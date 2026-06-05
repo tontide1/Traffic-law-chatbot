@@ -7,6 +7,7 @@ When working in this repository:
 - Prefer simple, surgical changes over broad refactors.
 - Preserve existing project style, naming, formatting, and architecture unless explicitly asked to change them.
 - Do not introduce speculative abstractions, new frameworks, or unnecessary configuration.
+- When Serena MCP is available, prefer it for codebase exploration, symbol lookup, and architecture discovery before falling back to raw file scans.
 - For bugs, first identify the likely root cause, then make the smallest safe fix.
 - For non-trivial changes, state the plan, edit the code, then run the smallest relevant verification command.
 - Do not modify secrets, credentials, `.env` files, generated artifacts, model weights, raw datasets, or production data unless explicitly instructed.
