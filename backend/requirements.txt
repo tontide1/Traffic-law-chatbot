@@ -48,3 +48,7 @@ pdf2image>=1.17.0
 transformers>=4.37.0
 torch>=2.0.0
 sentence-transformers>=2.3.0
+
+docling>=2.0.0
+pytest>=8.2.0
+httpx>=0.27.0
