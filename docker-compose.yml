@@ -1,0 +1,76 @@
+services:
+  db:
+    build: ./db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: law_assistant
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DATABASE}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL}
+      - LLM_MODEL=${LLM_MODEL}
+      - LIGHTRAG_WORKING_DIR=/app/backend/data
+      - SUMMARY_LANGUAGE=Vietnamese
+      - 'ENTITY_TYPES=["Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"]'
+    depends_on:
+      - db
+
+  rag-ui:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DATABASE}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL}
+      - LLM_MODEL=${LLM_MODEL}
+      - LIGHTRAG_WORKING_DIR=/app/backend/data
+      - SUMMARY_LANGUAGE=Vietnamese
+      - 'ENTITY_TYPES=["Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"]'
+      # Storage Backend
+      - LIGHTRAG_KV_STORAGE=PGKVStorage
+      - LIGHTRAG_VECTOR_STORAGE=PGVectorStorage
+      - LIGHTRAG_GRAPH_STORAGE=PGGraphStorage
+      - LIGHTRAG_DOC_STATUS_STORAGE=PGDocStatusStorage
+      # LLM & Embedding Binding (OpenRouter)
+      - LLM_BINDING=openai
+      - LLM_BINDING_API_KEY=${OPENROUTER_API_KEY}
+      - LLM_BINDING_HOST=https://openrouter.ai/api/v1
+      - EMBEDDING_BINDING=openai
+      - EMBEDDING_BINDING_API_KEY=${OPENROUTER_API_KEY}
+      - EMBEDDING_BINDING_HOST=https://openrouter.ai/api/v1
+      - EMBEDDING_DIM=1536
+    command: lightrag-server --host 0.0.0.0 --port 8001 --working-dir /app/backend/data
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
