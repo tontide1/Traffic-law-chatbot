@@ -20,5 +20,5 @@ Preferred local environment:
 - Using python 3.11 with
 
 ```bash
-conda activate legal-rag
+conda activate legal_rag
 ```

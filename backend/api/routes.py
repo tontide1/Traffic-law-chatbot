@@ -5,6 +5,7 @@ import json
 import asyncio
 from lightrag import LightRAG, QueryParam
 from backend.core.rag_engine import RAGEngine
+from backend.core.document_parser import parse_pdf_to_markdown
 import shutil
 import os
 from backend.config import settings
@@ -134,21 +135,19 @@ async def list_documents():
 async def upload_file(file: UploadFile = File(...)):
     if not file.filename.endswith(".pdf") and not file.filename.endswith(".txt"):
         raise HTTPException(status_code=400, detail="Only PDF and TXT files are supported")
-    
+
     file_path = os.path.join(settings.LIGHTRAG_WORKING_DIR, file.filename)
     os.makedirs(settings.LIGHTRAG_WORKING_DIR, exist_ok=True)
-    
+
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    
+
     try:
         rag = RAGEngine.get_instance()
-        
+
         if file.filename.endswith(".pdf"):
-            from backend.core.llm_services import qwen_vl_parse_pdf
-            content = await qwen_vl_parse_pdf(file_path)
+            content = await parse_pdf_to_markdown(file_path)
         else:
-            # Assume TXT
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
 
@@ -156,13 +155,14 @@ async def upload_file(file: UploadFile = File(...)):
             raise ValueError("File is empty or no text could be extracted")
 
         await rag.ainsert(content, file_paths=[file.filename])
-            
+
         return UploadResponse(
             filename=file.filename,
             status="success",
-            message=f"File uploaded and indexed via Qwen 3 VL ({len(content)} characters)"
+            message=f"File uploaded and indexed via Docling ({len(content)} characters)"
         )
     except Exception as e:
+        print(f"Error indexing uploaded file {file.filename}: {e}")
         return UploadResponse(
             filename=file.filename,
             status="error",
