@@ -2,12 +2,12 @@
 
 ![App Screenshot](docs/AppScreenshot.png)
 
-An advanced legal document assistant powered by **LightRAG**, localized for Vietnamese law and featuring high-fidelity Knowledge Graph visualization. This project uses **FastAPI** for the backend, **React** for the frontend, and **PostgreSQL (Apache AGE + pgvector)** for graph and vector storage.
+An advanced legal document assistant powered by **LightRAG**, localized for Vietnamese law and featuring high-fidelity Knowledge Graph visualization. This project uses **FastAPI** for the backend, **React** for the frontend, and **PostgreSQL (Apache AGE + pgvector)** for graph and vector storage. PDF ingestion is handled locally with **Docling**.
 
 ## 🚀 Key Features
 
 - **Vietnamese Legal Localization**: Specialized entity extraction for laws (*Điều khoản, Văn bản pháp luật, Cơ quan ban hành*).
-- **Vision-Based PDF Parsing**: Uses **Qwen 3 VL** (via OpenRouter) to extract raw legal text from PDFs with absolute fidelity, even for scans.
+- **Local PDF Parsing with Docling**: Uses **Docling** to extract structured Markdown from text-based legal PDFs entirely locally.
 - **Interactive Knowledge Graph**: Explore legal relationships via the integrated **LightRAG Graph UI** on port 8001.
 
   ![KG Screenshot 1](docs/KGScreenshot1.png)
@@ -28,7 +28,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
 - **Backend**: Python 3.11, FastAPI, `lightrag-hku`
 - **Frontend**: Vite, React, TypeScript, Tailwind CSS, Shadcn UI
 - **Database**: PostgreSQL with `pgvector` (Vector) and `Apache AGE` (Graph)
-- **LLM/Embeddings**: DeepSeek V3, Qwen 3 VL, OpenAI Embeddings (via OpenRouter)
+- **LLM/Embeddings**: DeepSeek V3, OpenAI Embeddings (via OpenRouter)
 - **Deployment**: Docker Compose
 
 ## 📦 Getting Started
