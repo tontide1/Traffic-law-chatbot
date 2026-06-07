@@ -16,7 +16,7 @@ from typing import Union
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
-    rag = RAGEngine.get_instance()
+    rag = RAGEngine.get_query_instance()
     print(f"DEBUG: Chat request received. message='{request.message[:20]}...', comparison_mode={request.comparison_mode}, stream={request.stream}")
     
     system_prompt = (
@@ -104,7 +104,7 @@ async def chat(request: ChatRequest):
 
 @router.get("/documents")
 async def list_documents():
-    rag = RAGEngine.get_instance()
+    rag = RAGEngine.get_query_instance()
     try:
         # Get documents from doc_status storage
         # Use get_docs_paginated to fetch all documents
@@ -143,7 +143,7 @@ async def upload_file(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        rag = RAGEngine.get_instance()
+        rag = RAGEngine.get_indexing_instance()
 
         if file.filename.endswith(".pdf"):
             content = await parse_pdf_to_markdown(file_path)
