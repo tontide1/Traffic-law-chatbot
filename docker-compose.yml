@@ -40,8 +40,6 @@ services:
       - EMBEDDING_MODEL=${EMBEDDING_MODEL}
       - EMBEDDING_DIM=${EMBEDDING_DIM}
       - EMBEDDING_MAX_TOKEN_SIZE=${EMBEDDING_MAX_TOKEN_SIZE}
-      - EMBEDDING_QUERY_PREFIX=${EMBEDDING_QUERY_PREFIX}
-      - EMBEDDING_DOCUMENT_PREFIX=${EMBEDDING_DOCUMENT_PREFIX}
       - LIGHTRAG_WORKING_DIR=/app/backend/data
       - SUMMARY_LANGUAGE=Vietnamese
       - 'ENTITY_TYPES=["Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"]'
