@@ -1,96 +1,128 @@
 import openai
 from typing import List, Optional
 
+import numpy as np
+
 from backend.config import settings
 
-# Global client cache to avoid pickling issues and redundant connections
-_async_client: Optional[openai.AsyncOpenAI] = None
+_indexing_client: Optional[openai.AsyncOpenAI] = None
+_answer_client: Optional[openai.AsyncOpenAI] = None
+_embedding_client: Optional[openai.AsyncOpenAI] = None
 
 
-def get_openai_client():
-    global _async_client
-    if _async_client is None:
-        _async_client = openai.AsyncOpenAI(
-            api_key=settings.OPENROUTER_API_KEY,
-            base_url="https://openrouter.ai/api/v1"
+def reset_client_caches():
+    global _indexing_client, _answer_client, _embedding_client
+    _indexing_client = None
+    _answer_client = None
+    _embedding_client = None
+
+
+def _build_async_client(api_key: str, base_url: str) -> openai.AsyncOpenAI:
+    return openai.AsyncOpenAI(api_key=api_key, base_url=base_url)
+
+
+def get_indexing_llm_client():
+    global _indexing_client
+    if _indexing_client is None:
+        _indexing_client = _build_async_client(
+            api_key=settings.get_indexing_llm_api_key(),
+            base_url=settings.INDEXING_LLM_BASE_URL,
         )
-    return _async_client
+    return _indexing_client
 
 
-class QwenEmbeddingFunc:
-    def __init__(self):
-        self.model_name = settings.EMBEDDING_MODEL
-
-    def _get_prefix(self, is_query: bool) -> str:
-        if is_query:
-            return "Instruct: Given a legal query, retrieve relevant statutes...\nQuery: "
-        return ""
-
-    async def __call__(self, texts: List[str]):
-        import numpy as np
-
-        client = get_openai_client()
-        results = []
-        for text in texts:
-            prefix = self._get_prefix(is_query=text.strip().endswith("?"))
-
-            response = await client.embeddings.create(
-                model=self.model_name,
-                input=prefix + text
-            )
-            results.append(response.data[0].embedding)
-        return np.array(results)
+def get_answer_llm_client():
+    global _answer_client
+    if _answer_client is None:
+        _answer_client = _build_async_client(
+            api_key=settings.get_answer_llm_api_key(),
+            base_url=settings.ANSWER_LLM_BASE_URL,
+        )
+    return _answer_client
 
 
-async def deepseek_llm_func(
-    prompt: str,
-    system_prompt: str = None,
-    history: List[dict] = None,
-    **kwargs
-) -> str:
-    client = get_openai_client()
+def get_embedding_client():
+    global _embedding_client
+    if _embedding_client is None:
+        _embedding_client = _build_async_client(
+            api_key=settings.get_embedding_api_key(),
+            base_url=settings.EMBEDDING_BASE_URL,
+        )
+    return _embedding_client
 
+
+def _base_messages(prompt: str, system_prompt: str = None, history: List[dict] = None):
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
-
     if history:
         messages.extend(history)
-
     messages.append({"role": "user", "content": prompt})
+    return messages
 
-    extra_headers = {
-        "HTTP-Referer": "https://github.com/traffic/law-assistant",
-        "X-Title": "Traffic Law Assistant",
-    }
 
-    allowed_params = [
-        "model", "messages", "stream", "temperature", "top_p", "n", "stop", "max_tokens",
-        "presence_penalty", "frequency_penalty", "logit_bias", "user", "response_format",
-        "seed", "tools", "tool_choice", "parallel_tool_calls"
-    ]
-    api_kwargs = {k: v for k, v in kwargs.items() if k in allowed_params}
-
-    response = await client.chat.completions.create(
-        model=settings.LLM_MODEL,
-        messages=messages,
-        extra_headers=extra_headers,
-        **api_kwargs
-    )
-
-    if api_kwargs.get("stream"):
+def _stream_or_content(response, stream: bool):
+    if stream:
         async def stream_generator():
-            print("LLM: Starting stream generator")
-            try:
-                async for chunk in response:
-                    if chunk.choices and chunk.choices[0].delta.content:
-                        c = chunk.choices[0].delta.content
-                        print(f"LLM CHUNK: {c}")
-                        yield c
-            except Exception as e:
-                print(f"LLM STREAM ERROR: {str(e)}")
-            print("LLM: Stream generator finished")
+            async for chunk in response:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
 
         return stream_generator()
-    else:
-        return response.choices[0].message.content
+    return response.choices[0].message.content
+
+
+class VLLMEmbeddingFunc:
+    def __init__(self, prefix: str = ""):
+        self.model_name = settings.EMBEDDING_MODEL
+        self.prefix = prefix
+
+    async def __call__(self, texts: List[str]):
+        client = get_embedding_client()
+        vectors = []
+        for text in texts:
+            response = await client.embeddings.create(
+                model=self.model_name,
+                input=f"{self.prefix}{text}",
+                dimensions=settings.EMBEDDING_DIM,
+            )
+            vectors.append(response.data[0].embedding)
+        return np.array(vectors)
+
+
+async def indexing_llm_func(
+    prompt: str,
+    system_prompt: str = None,
+    history: List[dict] = None,
+    **kwargs,
+) -> str:
+    client = get_indexing_llm_client()
+    messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
+    request_kwargs = {k: v for k, v in kwargs.items() if k != "model"}
+    extra_body = dict(request_kwargs.pop("extra_body", {}) or {})
+    extra_body["thinking"] = {"type": settings.INDEXING_LLM_THINKING_MODE}
+
+    response = await client.chat.completions.create(
+        model=settings.INDEXING_LLM_MODEL,
+        messages=messages,
+        extra_body=extra_body,
+        **request_kwargs,
+    )
+    return _stream_or_content(response, stream=bool(request_kwargs.get("stream")))
+
+
+async def answer_llm_func(
+    prompt: str,
+    system_prompt: str = None,
+    history: List[dict] = None,
+    **kwargs,
+) -> str:
+    client = get_answer_llm_client()
+    messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
+
+    response = await client.chat.completions.create(
+        model=settings.ANSWER_LLM_MODEL,
+        messages=messages,
+        **kwargs,
+    )
+    return _stream_or_content(response, stream=bool(kwargs.get("stream")))
