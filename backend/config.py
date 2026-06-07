@@ -3,44 +3,82 @@ from typing import Optional
 import json
 from pydantic import field_validator
 
+
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/law_assistant"
-    
+
     # Postgres individual components for LightRAG
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DATABASE: str = "law_assistant"
-    
+
     REDIS_URL: Optional[str] = None
-    
+
     OPENROUTER_API_KEY: Optional[str] = None
-    
-    EMBEDDING_MODEL: str = "openai/text-embedding-3-small"
-    LLM_MODEL: str = "deepseek/deepseek-v3.2"
-    
+
+    INDEXING_LLM_BASE_URL: str = "https://api.deepseek.com"
+    INDEXING_LLM_API_KEY: Optional[str] = None
+    INDEXING_LLM_MODEL: str = "deepseek-v4-flash"
+    INDEXING_LLM_THINKING_MODE: str = "disabled"
+
+    ANSWER_LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
+    ANSWER_LLM_API_KEY: Optional[str] = None
+    ANSWER_LLM_MODEL: str = "openai/gpt-oss-120b"
+
+    EMBEDDING_BASE_URL: str = "http://host.docker.internal:8002/v1"
+    EMBEDDING_API_KEY: str = "EMPTY"
+    EMBEDDING_MODEL: str = "Qwen/Qwen3-Embedding-0.6B"
+    EMBEDDING_DIM: int = 1024
+    EMBEDDING_MAX_TOKEN_SIZE: int = 512
+    EMBEDDING_QUERY_PREFIX: str = (
+        "Instruct: Given a legal query, retrieve relevant statutes and legal passages.\nQuery: "
+    )
+    EMBEDDING_DOCUMENT_PREFIX: str = ""
+
     SUMMARY_LANGUAGE: str = "Vietnamese"
     ENTITY_TYPES: list[str] = [
-        "Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", 
-        "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"
+        "Văn bản pháp luật",
+        "Điều khoản",
+        "Cơ quan ban hành",
+        "Đối tượng áp dụng",
+        "Hành vi vi phạm",
+        "Hình thức xử phạt",
+        "Thời hạn",
+        "Khái niệm pháp lý",
     ]
-    
+
     LIGHTRAG_WORKING_DIR: str = "./backend/data"
 
     @field_validator("ENTITY_TYPES", mode="before")
     @classmethod
-    def parse_entity_types(cls, v):
-        if isinstance(v, str):
-            v = v.strip()
-            if v.startswith("[") and v.endswith("]"):
+    def parse_entity_types(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if value.startswith("[") and value.endswith("]"):
                 try:
-                    return json.loads(v)
-                except:
+                    return json.loads(value)
+                except json.JSONDecodeError:
                     pass
-            return [x.strip() for x in v.split(",")]
-        return v
+            return [item.strip() for item in value.split(",")]
+        return value
+
+    def get_indexing_llm_api_key(self) -> str:
+        if not self.INDEXING_LLM_API_KEY:
+            raise ValueError("INDEXING_LLM_API_KEY is required")
+        return self.INDEXING_LLM_API_KEY
+
+    def get_answer_llm_api_key(self) -> str:
+        key = self.ANSWER_LLM_API_KEY or self.OPENROUTER_API_KEY
+        if not key:
+            raise ValueError("ANSWER_LLM_API_KEY or OPENROUTER_API_KEY is required")
+        return key
+
+    def get_embedding_api_key(self) -> str:
+        return self.EMBEDDING_API_KEY or "EMPTY"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
 
 settings = Settings()
