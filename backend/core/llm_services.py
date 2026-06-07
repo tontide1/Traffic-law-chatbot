@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 import openai
 from typing import List, Optional
 
@@ -61,7 +62,7 @@ def _base_messages(prompt: str, system_prompt: str = None, history: List[dict] =
     return messages
 
 
-def _stream_or_content(response, stream: bool):
+def _stream_or_content(response, stream: bool) -> str | AsyncIterator[str]:
     if stream:
         async def stream_generator():
             async for chunk in response:
@@ -95,7 +96,7 @@ async def indexing_llm_func(
     system_prompt: str = None,
     history: List[dict] = None,
     **kwargs,
-) -> str:
+) -> str | AsyncIterator[str]:
     client = get_indexing_llm_client()
     messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
     request_kwargs = {k: v for k, v in kwargs.items() if k != "model"}
@@ -116,7 +117,7 @@ async def answer_llm_func(
     system_prompt: str = None,
     history: List[dict] = None,
     **kwargs,
-) -> str:
+) -> str | AsyncIterator[str]:
     client = get_answer_llm_client()
     messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
 

@@ -1,5 +1,7 @@
 import asyncio
+from collections.abc import AsyncIterator
 from types import SimpleNamespace
+from typing import get_type_hints
 from unittest.mock import AsyncMock
 
 import numpy as np
@@ -177,3 +179,15 @@ def test_streaming_response_yields_delta_contents():
 
     chunks = asyncio.run(_collect_async_gen(result))
     assert chunks == ["hello ", "world"]
+
+
+def test_indexing_llm_func_annotation_covers_streaming_output():
+    return_hint = get_type_hints(llm_services.indexing_llm_func)["return"]
+
+    assert return_hint == str | AsyncIterator[str]
+
+
+def test_answer_llm_func_annotation_covers_streaming_output():
+    return_hint = get_type_hints(llm_services.answer_llm_func)["return"]
+
+    assert return_hint == str | AsyncIterator[str]
