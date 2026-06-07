@@ -20,6 +20,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
   ![Comparison 4](docs/Comparison4.png)
   ![Comparison 5](docs/Comparison5.png)
 - **Hybrid RAG Retrieval**: Combined vector and graph search for precise legal grounding.
+- **Role-Specific Inference Stack**: Uses DeepSeek-V4-Flash for KG extraction, `openai/gpt-oss-120b` for answer generation, and local vLLM-served Qwen3 embeddings for retrieval.
 - **Modern Chat Interface**: Beautiful React UI with Markdown support and source citations.
 - **Document Inventory**: Manage and track the status of all indexed legal documents.
 
@@ -28,7 +29,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
 - **Backend**: Python 3.11, FastAPI, `lightrag-hku`
 - **Frontend**: Vite, React, TypeScript, Tailwind CSS, Shadcn UI
 - **Database**: PostgreSQL with `pgvector` (Vector) and `Apache AGE` (Graph)
-- **LLM/Embeddings**: DeepSeek V3, OpenAI Embeddings (via OpenRouter)
+- **LLM/Embeddings**: DeepSeek-V4-Flash (KG indexing), `openai/gpt-oss-120b` via OpenRouter (answers), `Qwen/Qwen3-Embedding-0.6B` via local vLLM (embeddings)
 - **Deployment**: Docker Compose
 
 ## 📦 Getting Started
@@ -47,8 +48,14 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DATABASE=law_assistant
 OPENROUTER_API_KEY=your_key_here
-LLM_MODEL=deepseek/deepseek-v3.2
-EMBEDDING_MODEL=openai/text-embedding-3-small
+INDEXING_LLM_BASE_URL=https://api.deepseek.com
+INDEXING_LLM_API_KEY=your_deepseek_key_here
+INDEXING_LLM_MODEL=deepseek-v4-flash
+ANSWER_LLM_BASE_URL=https://openrouter.ai/api/v1
+ANSWER_LLM_MODEL=openai/gpt-oss-120b
+EMBEDDING_BASE_URL=http://host.docker.internal:8002/v1
+EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
+EMBEDDING_DIM=1024
 ```
 
 ### Running the Application
@@ -58,7 +65,12 @@ EMBEDDING_MODEL=openai/text-embedding-3-small
    docker compose up -d
    ```
 
-2. **Start the Frontend (Locally)**:
+2. **Start the local embedding service (Host Machine)**:
+   ```bash
+   vllm serve Qwen/Qwen3-Embedding-0.6B --port 8002 --task embed
+   ```
+
+3. **Start the Frontend (Locally)**:
    ```bash
    cd frontend
    npm install
@@ -89,8 +101,8 @@ For the best performance with Vietnamese legal text, consider these alternative 
 - **[Qwen3-Embedding-8B](https://huggingface.co/Qwen/Qwen3-Embedding-8B)**: State-of-the-art multilingual embedding model.
 - **[GreenNode-Embedding-Large-VN-Mixed-V1](https://huggingface.co/GreenNode/GreenNode-Embedding-Large-VN-Mixed-V1)**: Specialized embedding for Vietnamese language tasks.
 
-> [!NOTE]
-> While models like Qwen3 or GreenNode offer superior performance, **OpenAI's `text-embedding-3-small` (1536D)** was chosen as the default for this implementation to stay within the recommended vector dimension limits for efficient **pgvector HNSW indexing** without excessive memory overhead.
+> [!IMPORTANT]
+> The new `Qwen/Qwen3-Embedding-0.6B` embedding model uses a `1024`-dimensional vector instead of the previous `1536` dimensions. Existing vector data must be re-indexed after this migration.
 
 ---
 
