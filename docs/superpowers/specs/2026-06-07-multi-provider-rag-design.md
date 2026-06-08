@@ -231,7 +231,7 @@ Embeddings should be served locally via vLLM on an OpenAI-compatible endpoint.
 Recommended host-side command shape:
 
 ```bash
-vllm serve Qwen/Qwen3-Embedding-0.6B --port 8002
+vllm serve Qwen/Qwen3-Embedding-0.6B --runner pooling --port 8002 --dtype float16 --gpu-memory-utilization 0.75
 ```
 
 The backend then points its embeddings client to:

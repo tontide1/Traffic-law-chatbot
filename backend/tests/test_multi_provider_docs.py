@@ -38,4 +38,12 @@ def test_readme_describes_deepseek_openrouter_and_local_vllm():
     assert "openai/gpt-oss-120b" in readme
     assert "Qwen/Qwen3-Embedding-0.6B" in readme
     assert "vLLM" in readme
+    assert "--runner pooling" in readme
+    assert "--dtype float16" in readme
+    assert "--gpu-memory-utilization 0.75" in readme
+    assert "--max-model-len 2048" in readme
+    assert "--attention-backend TRITON_ATTN" in readme
+    assert "GTX 1660 Super" in readme
+    assert "Turing-based GTX 16-series" in readme
+    assert "--task embed" not in readme
     assert "text-embedding-3-small" not in readme

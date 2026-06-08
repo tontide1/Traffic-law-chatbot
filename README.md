@@ -66,8 +66,9 @@ EMBEDDING_DIM=1024
    ```
 
 2. **Start the local embedding service (Host Machine)**:
+   For NVIDIA GeForce GTX 1660 Super and other Turing-based GTX 16-series GPUs, use:
    ```bash
-   vllm serve Qwen/Qwen3-Embedding-0.6B --port 8002 --task embed
+   vllm serve Qwen/Qwen3-Embedding-0.6B --runner pooling --port 8002 --dtype float16 --gpu-memory-utilization 0.75 --max-model-len 2048 --attention-backend TRITON_ATTN
    ```
 
 3. **Start the Frontend (Locally)**:

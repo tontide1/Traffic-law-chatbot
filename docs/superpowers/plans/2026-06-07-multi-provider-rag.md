@@ -1083,7 +1083,7 @@ Update the `README.md` sections that mention the old embedding and answer models
 ```md
 3. **Start the local embedding service (Host Machine)**:
    ~~~bash
-   vllm serve Qwen/Qwen3-Embedding-0.6B --port 8002 --task embed
+   vllm serve Qwen/Qwen3-Embedding-0.6B --runner pooling --port 8002 --dtype float16 --gpu-memory-utilization 0.75
    ~~~
 
 4. **Start the Frontend (Locally)**:
@@ -1147,7 +1147,7 @@ Expected: PASS with all targeted tests green.
 Run:
 
 ```bash
-vllm serve Qwen/Qwen3-Embedding-0.6B --port 8002 --task embed
+vllm serve Qwen/Qwen3-Embedding-0.6B --runner pooling --port 8002 --dtype float16 --gpu-memory-utilization 0.75
 ```
 
 Expected: vLLM starts an OpenAI-compatible embeddings server and logs that it is serving requests on port `8002`.
