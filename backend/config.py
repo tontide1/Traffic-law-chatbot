@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     ANSWER_LLM_API_KEY: Optional[str] = None
     ANSWER_LLM_MODEL: str = "openai/gpt-oss-120b"
 
+    GOOGLE_STUDIO_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    GOOGLE_STUDIO_API_KEY: Optional[str] = None
+    GOOGLE_STUDIO_MODEL: str = "gemini-2.5-flash"
+
     EMBEDDING_BASE_URL: str = "http://host.docker.internal:8002/v1"
     EMBEDDING_API_KEY: str = "EMPTY"
     EMBEDDING_MODEL: str = "Qwen/Qwen3-Embedding-0.6B"
@@ -74,6 +78,11 @@ class Settings(BaseSettings):
         if not key:
             raise ValueError("ANSWER_LLM_API_KEY or OPENROUTER_API_KEY is required")
         return key
+
+    def get_google_studio_api_key(self) -> str:
+        if not self.GOOGLE_STUDIO_API_KEY:
+            raise ValueError("GOOGLE_STUDIO_API_KEY is required")
+        return self.GOOGLE_STUDIO_API_KEY
 
     def get_embedding_api_key(self) -> str:
         return self.EMBEDDING_API_KEY or "EMPTY"

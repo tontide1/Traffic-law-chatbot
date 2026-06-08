@@ -191,3 +191,44 @@ def test_answer_llm_func_annotation_covers_streaming_output():
     return_hint = get_type_hints(llm_services.answer_llm_func)["return"]
 
     assert return_hint == str | AsyncIterator[str]
+
+
+def test_get_google_studio_llm_client_uses_google_settings(monkeypatch):
+    created = []
+
+    class DummyClient:
+        def __init__(self, **kwargs):
+            created.append(kwargs)
+
+    monkeypatch.setattr(llm_services.openai, "AsyncOpenAI", DummyClient)
+    monkeypatch.setattr(llm_services.settings, "GOOGLE_STUDIO_API_KEY", "google-key")
+    monkeypatch.setattr(
+        llm_services.settings,
+        "GOOGLE_STUDIO_BASE_URL",
+        "https://generativelanguage.googleapis.com/v1beta/openai/",
+    )
+
+    llm_services.get_google_studio_llm_client()
+
+    assert created == [
+        {
+            "api_key": "google-key",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        }
+    ]
+
+
+def test_google_studio_indexing_llm_func_sends_correct_payload(monkeypatch):
+    create = AsyncMock(return_value=FakeChatResponse("indexed with google"))
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+
+    monkeypatch.setattr(llm_services, "get_google_studio_llm_client", lambda: client)
+    monkeypatch.setattr(llm_services.settings, "GOOGLE_STUDIO_MODEL", "gemini-2.5-flash")
+
+    result = asyncio.run(llm_services.google_studio_indexing_llm_func("build graph"))
+
+    assert result == "indexed with google"
+    kwargs = create.await_args.kwargs
+    assert kwargs["model"] == "gemini-2.5-flash"
+    assert kwargs["messages"][-1]["content"] == "build graph"
+
