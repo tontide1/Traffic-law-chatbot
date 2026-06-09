@@ -23,6 +23,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
 - **Role-Specific Inference Stack**: Uses DeepSeek-V4-Flash for KG extraction, `openai/gpt-oss-120b` for answer generation, and local vLLM-served Qwen3 embeddings for retrieval.
 - **Modern Chat Interface**: Beautiful React UI with Markdown support and source citations.
 - **Document Inventory**: Manage and track the status of all indexed legal documents.
+- **Selectable Indexing Providers**: Users can choose `DeepSeek` or `Google Studio` from the left sidebar for new knowledge-graph builds. The project keeps one shared knowledge base, and switching providers affects only future uploads. Existing documents are not rebuilt automatically.
 
 ## 🛠 Tech Stack
 
@@ -57,6 +58,8 @@ EMBEDDING_BASE_URL=http://host.docker.internal:8002/v1
 EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
 EMBEDDING_DIM=1024
 ```
+
+Google Studio indexing uses the Gemini OpenAI-compatible endpoint. Set `GOOGLE_STUDIO_API_KEY` in `.env` if you want the sidebar selector to support Google Studio builds in addition to DeepSeek.
 
 ### Running the Application
 

@@ -32,6 +32,9 @@ services:
       - INDEXING_LLM_API_KEY=${INDEXING_LLM_API_KEY}
       - INDEXING_LLM_MODEL=${INDEXING_LLM_MODEL:-deepseek-v4-flash}
       - INDEXING_LLM_THINKING_MODE=${INDEXING_LLM_THINKING_MODE:-disabled}
+      - GOOGLE_STUDIO_BASE_URL=${GOOGLE_STUDIO_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
+      - GOOGLE_STUDIO_API_KEY=${GOOGLE_STUDIO_API_KEY}
+      - GOOGLE_STUDIO_MODEL=${GOOGLE_STUDIO_MODEL:-gemini-2.5-flash}
       - ANSWER_LLM_BASE_URL=${ANSWER_LLM_BASE_URL:-https://openrouter.ai/api/v1}
       - ANSWER_LLM_API_KEY=${ANSWER_LLM_API_KEY}
       - ANSWER_LLM_MODEL=${ANSWER_LLM_MODEL:-openai/gpt-oss-120b}
