@@ -49,7 +49,7 @@ class IndexingProviderStore:
 
             def _write_atomic():
                 self._path.parent.mkdir(parents=True, exist_ok=True)
-                tmp_path = self._path.with_suffix(".tmp")
+                tmp_path = self._path.with_suffix(f".tmp.{os.getpid()}")
                 tmp_path.write_text(
                     json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
                     encoding="utf-8",

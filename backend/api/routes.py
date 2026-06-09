@@ -156,7 +156,7 @@ async def upload_file(file: UploadFile = File(...), provider: str = Form("deepse
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        rag = RAGEngine.get_indexing_instance(resolved_provider)
+        rag = await RAGEngine.get_indexing_instance(resolved_provider)
         provider_store = IndexingProviderStore(settings.LIGHTRAG_WORKING_DIR)
 
         if file.filename.endswith(".pdf"):
@@ -169,7 +169,10 @@ async def upload_file(file: UploadFile = File(...), provider: str = Form("deepse
             raise ValueError("File is empty or no text could be extracted")
 
         await rag.ainsert(content, file_paths=[file.filename])
-        await provider_store.set_provider(file.filename, resolved_provider)
+        try:
+            await provider_store.set_provider(file.filename, resolved_provider)
+        except Exception as e:
+            print(f"WARNING: Failed to save document provider metadata for {file.filename}: {e}")
 
         return UploadResponse(
             filename=file.filename,

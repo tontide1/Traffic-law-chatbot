@@ -15,7 +15,7 @@ def setup_function():
 
 def test_getters_raise_before_initialize():
     with pytest.raises(RuntimeError, match="DeepSeek indexing RAG engine not initialized"):
-        rag_engine.RAGEngine.get_indexing_instance()
+        asyncio.run(rag_engine.RAGEngine.get_indexing_instance("deepseek"))
 
     with pytest.raises(RuntimeError, match="Query RAG engine not initialized"):
         rag_engine.RAGEngine.get_query_instance()
@@ -43,18 +43,16 @@ def test_initialize_builds_two_indexing_engines_and_one_query_engine(monkeypatch
 
     asyncio.run(rag_engine.RAGEngine.initialize())
 
-    assert len(created) == 3
+    assert len(created) == 2
     assert created[0]["llm_model_func"] is rag_engine.indexing_llm_func
-    assert created[1]["llm_model_func"] is rag_engine.google_studio_indexing_llm_func
-    assert created[2]["llm_model_func"] is rag_engine.answer_llm_func
+    assert created[1]["llm_model_func"] is rag_engine.answer_llm_func
     assert created[0]["embedding_func"]["func"] == "embed:"
-    assert created[1]["embedding_func"]["func"] == "embed:"
-    assert created[2]["embedding_func"]["func"] == "embed:search_query: "
+    assert created[1]["embedding_func"]["func"] == "embed:search_query: "
 
 
 def test_get_indexing_instance_selects_provider_after_initialize(monkeypatch):
     rag_engine.RAGEngine._deepseek_indexing_instance = "deepseek-engine"
     rag_engine.RAGEngine._google_studio_indexing_instance = "google-engine"
 
-    assert rag_engine.RAGEngine.get_indexing_instance("deepseek") == "deepseek-engine"
-    assert rag_engine.RAGEngine.get_indexing_instance("google_studio") == "google-engine"
+    assert asyncio.run(rag_engine.RAGEngine.get_indexing_instance("deepseek")) == "deepseek-engine"
+    assert asyncio.run(rag_engine.RAGEngine.get_indexing_instance("google_studio")) == "google-engine"
