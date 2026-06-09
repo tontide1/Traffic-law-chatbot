@@ -3,11 +3,36 @@ import ChatInterface from './components/ChatInterface'
 import FileUpload from './components/FileUpload'
 import { Scale, Database, Shield, Share2, FileText, ExternalLink, Columns } from 'lucide-react'
 import client from './api/client'
+import {
+  getStoredIndexingProvider,
+  setStoredIndexingProvider,
+  DEFAULT_INDEXING_PROVIDER,
+  IndexingProvider,
+  IndexedProvider,
+  getIndexingProviderLabel,
+} from './lib/indexingProvider'
+
+interface IndexedDocument {
+  id: string
+  status: string
+  source: string
+  content_summary?: string
+  indexed_provider?: IndexedProvider
+}
 
 function App() {
   const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected'>('connected')
-  const [documents, setDocuments] = useState<any[]>([])
+  const [documents, setDocuments] = useState<IndexedDocument[]>([])
   const [comparisonMode, setComparisonMode] = useState(false)
+  const [selectedIndexingProvider, setSelectedIndexingProvider] = useState<IndexingProvider>(() => {
+    if (typeof window === 'undefined') return DEFAULT_INDEXING_PROVIDER
+    return getStoredIndexingProvider()
+  })
+  const [isUploading, setIsUploading] = useState(false)
+
+  useEffect(() => {
+    setStoredIndexingProvider(selectedIndexingProvider)
+  }, [selectedIndexingProvider])
 
   const fetchDocuments = async () => {
     try {
@@ -58,6 +83,35 @@ function App() {
             <p className="text-[10px] text-muted-foreground mt-2 px-1">
               {comparisonMode ? "Comparing Naive vs Hybrid RAG responses." : "Standard Hybrid RAG retrieval active."}
             </p>
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-sm font-medium text-foreground">Indexing Provider</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {(['deepseek', 'google_studio'] as IndexingProvider[]).map((provider) => {
+                  const active = selectedIndexingProvider === provider
+                  return (
+                    <button
+                      key={provider}
+                      type="button"
+                      aria-pressed={active}
+                      disabled={isUploading}
+                      onClick={() => setSelectedIndexingProvider(provider)}
+                      className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${
+                        active
+                          ? 'bg-primary/10 border-primary text-primary'
+                          : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
+                      } ${isUploading ? 'cursor-not-allowed opacity-60' : ''}`}
+                    >
+                      {getIndexingProviderLabel(provider)}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-[10px] text-muted-foreground px-1">
+                Applies to new knowledge graph builds only. Existing documents are not rebuilt automatically.
+              </p>
+            </div>
           </section>
 
           <section>
@@ -70,7 +124,11 @@ function App() {
 
           <section>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Knowledge Base</h2>
-            <FileUpload onSuccess={fetchDocuments} />
+            <FileUpload
+              onSuccess={fetchDocuments}
+              onUploadStateChange={setIsUploading}
+              selectedProvider={selectedIndexingProvider}
+            />
           </section>
 
           <section>
@@ -103,7 +161,11 @@ function App() {
                     <FileText className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate text-foreground" title={doc.source}>{doc.source}</p>
-                      <p className="text-[10px] text-muted-foreground capitalize">{doc.status}</p>
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-2">
+                        <span className="capitalize">{doc.status}</span>
+                        <span>&bull;</span>
+                        <span>{getIndexingProviderLabel(doc.indexed_provider || 'legacy')}</span>
+                      </p>
                     </div>
                   </div>
                 ))
@@ -119,7 +181,7 @@ function App() {
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Shield className="w-4 h-4" />
-            <span>DeepSeek V3.2 / Qwen 3</span>
+            <span>DeepSeek or Google Studio indexing</span>
           </div>
         </div>
       </aside>

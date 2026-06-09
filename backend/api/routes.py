@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from backend.api.schemas import ChatRequest, ChatResponse, ComparisonResponse, UploadResponse
 from fastapi.responses import StreamingResponse
 import json
@@ -9,8 +9,18 @@ from backend.core.document_parser import parse_pdf_to_markdown
 import shutil
 import os
 from backend.config import settings
+from backend.core.indexing_provider_store import IndexingProviderStore
 
 router = APIRouter()
+
+SUPPORTED_INDEXING_PROVIDERS = {"deepseek", "google_studio"}
+
+def resolve_indexing_provider(provider: str | None) -> str:
+    value = (provider or "deepseek").strip().lower()
+    if value not in SUPPORTED_INDEXING_PROVIDERS:
+        raise HTTPException(status_code=400, detail=f"Unsupported indexing provider: {provider}")
+    return value
+
 
 from typing import Union
 
@@ -105,34 +115,37 @@ async def chat(request: ChatRequest):
 @router.get("/documents")
 async def list_documents():
     rag = RAGEngine.get_query_instance()
+    provider_store = IndexingProviderStore(settings.LIGHTRAG_WORKING_DIR)
     try:
-        # Get documents from doc_status storage
-        # Use get_docs_paginated to fetch all documents
         docs_tuple, _ = await rag.doc_status.get_docs_paginated()
-        
-        # Result list
+        all_providers = await provider_store.get_all_providers()
         result = []
         for doc_id, status_obj in docs_tuple:
-            # status_obj is a DocProcessingStatus object
             status_str = "unknown"
             if hasattr(status_obj.status, "value"):
                 status_str = status_obj.status.value
             elif isinstance(status_obj.status, str):
                 status_str = status_obj.status
-                
-            result.append({
-                "id": doc_id,
-                "status": status_str,
-                "source": status_obj.file_path or "unknown",
-                "content_summary": (status_obj.content_summary[:100] + "...") if status_obj.content_summary else ""
-            })
+
+            source = status_obj.file_path or "unknown"
+            result.append(
+                {
+                    "id": doc_id,
+                    "status": status_str,
+                    "source": source,
+                    "content_summary": (status_obj.content_summary[:100] + "...") if status_obj.content_summary else "",
+                    "indexed_provider": all_providers.get(source, "legacy"),
+                }
+            )
         return result
     except Exception as e:
         print(f"Error listing documents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), provider: str = Form("deepseek")):
+    resolved_provider = resolve_indexing_provider(provider)
+
     if not file.filename.endswith(".pdf") and not file.filename.endswith(".txt"):
         raise HTTPException(status_code=400, detail="Only PDF and TXT files are supported")
 
@@ -143,7 +156,8 @@ async def upload_file(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        rag = RAGEngine.get_indexing_instance()
+        rag = await RAGEngine.get_indexing_instance(resolved_provider)
+        provider_store = IndexingProviderStore(settings.LIGHTRAG_WORKING_DIR)
 
         if file.filename.endswith(".pdf"):
             content = await parse_pdf_to_markdown(file_path)
@@ -155,18 +169,24 @@ async def upload_file(file: UploadFile = File(...)):
             raise ValueError("File is empty or no text could be extracted")
 
         await rag.ainsert(content, file_paths=[file.filename])
+        try:
+            await provider_store.set_provider(file.filename, resolved_provider)
+        except Exception as e:
+            print(f"WARNING: Failed to save document provider metadata for {file.filename}: {e}")
 
         return UploadResponse(
             filename=file.filename,
             status="success",
-            message=f"File uploaded and indexed via Docling ({len(content)} characters)"
+            message=f"File uploaded and indexed with {resolved_provider}",
         )
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error indexing uploaded file {file.filename}: {e}")
         return UploadResponse(
             filename=file.filename,
             status="error",
-            message=f"Failed to index file: {str(e)}"
+            message=f"Failed to index file: {str(e)}",
         )
 
 @router.get("/health")

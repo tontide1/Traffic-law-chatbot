@@ -51,3 +51,22 @@ def test_entity_types_string_parsing_still_works():
     )
 
     assert settings.ENTITY_TYPES == ["Điều khoản", "Văn bản pháp luật"]
+
+
+def test_google_studio_defaults_match_indexing_provider_selector_plan():
+    settings = Settings(_env_file=None)
+
+    assert settings.GOOGLE_STUDIO_BASE_URL == "https://generativelanguage.googleapis.com/v1beta/openai/"
+    assert settings.GOOGLE_STUDIO_MODEL == "gemini-2.5-flash"
+
+
+def test_missing_google_studio_key_raises_clear_error():
+    settings = Settings(_env_file=None, GOOGLE_STUDIO_API_KEY=None)
+
+    try:
+        settings.get_google_studio_api_key()
+    except ValueError as exc:
+        assert str(exc) == "GOOGLE_STUDIO_API_KEY is required"
+    else:
+        raise AssertionError("Expected Google Studio API key lookup to raise")
+

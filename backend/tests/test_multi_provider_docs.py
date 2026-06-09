@@ -47,3 +47,28 @@ def test_readme_describes_deepseek_openrouter_and_local_vllm():
     assert "Turing-based GTX 16-series" in readme
     assert "--task embed" not in readme
     assert "text-embedding-3-small" not in readme
+
+
+def test_env_example_describes_google_studio_selector_settings():
+    env_example = (REPO_ROOT / ".env.example").read_text(encoding="utf-8")
+
+    assert "GOOGLE_STUDIO_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/" in env_example
+    assert "GOOGLE_STUDIO_API_KEY=your_google_studio_api_key_here" in env_example
+    assert "GOOGLE_STUDIO_MODEL=gemini-2.5-flash" in env_example
+
+
+def test_compose_passes_google_studio_environment_to_backend():
+    compose = (REPO_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+
+    assert "GOOGLE_STUDIO_BASE_URL=${GOOGLE_STUDIO_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}" in compose
+    assert "GOOGLE_STUDIO_API_KEY=${GOOGLE_STUDIO_API_KEY}" in compose
+    assert "GOOGLE_STUDIO_MODEL=${GOOGLE_STUDIO_MODEL:-gemini-2.5-flash}" in compose
+
+
+def test_readme_mentions_shared_graph_and_sidebar_selector():
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "Google Studio" in readme
+    assert "left sidebar" in readme
+    assert "shared knowledge base" in readme
+    assert "Existing documents are not rebuilt automatically" in readme

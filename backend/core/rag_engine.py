@@ -1,15 +1,23 @@
+import asyncio
 import os
 
 from lightrag import LightRAG
 from lightrag.utils import EmbeddingFunc
 
 from backend.config import settings
-from backend.core.llm_services import VLLMEmbeddingFunc, answer_llm_func, indexing_llm_func
+from backend.core.llm_services import (
+    VLLMEmbeddingFunc,
+    answer_llm_func,
+    google_studio_indexing_llm_func,
+    indexing_llm_func,
+)
 
 
 class RAGEngine:
-    _indexing_instance = None
+    _deepseek_indexing_instance = None
+    _google_studio_indexing_instance = None
     _query_instance = None
+    _google_init_lock = asyncio.Lock()
 
     @classmethod
     def _apply_postgres_environment(cls):
@@ -30,12 +38,15 @@ class RAGEngine:
 
     @classmethod
     async def initialize(cls):
-        if cls._indexing_instance is not None and cls._query_instance is not None:
-            return cls._indexing_instance, cls._query_instance
+        if (
+            cls._deepseek_indexing_instance is not None
+            and cls._query_instance is not None
+        ):
+            return cls._deepseek_indexing_instance, cls._query_instance
 
         cls._apply_postgres_environment()
 
-        cls._indexing_instance = LightRAG(
+        cls._deepseek_indexing_instance = LightRAG(
             working_dir=settings.LIGHTRAG_WORKING_DIR,
             llm_model_func=indexing_llm_func,
             embedding_func=cls._build_embedding_func(settings.EMBEDDING_DOCUMENT_PREFIX),
@@ -48,7 +59,7 @@ class RAGEngine:
                 "entity_types": settings.ENTITY_TYPES,
             },
         )
-        await cls._indexing_instance.initialize_storages()
+        await cls._deepseek_indexing_instance.initialize_storages()
 
         cls._query_instance = LightRAG(
             working_dir=settings.LIGHTRAG_WORKING_DIR,
@@ -65,13 +76,35 @@ class RAGEngine:
         )
         await cls._query_instance.initialize_storages()
 
-        return cls._indexing_instance, cls._query_instance
+        return cls._deepseek_indexing_instance, cls._query_instance
 
     @classmethod
-    def get_indexing_instance(cls):
-        if cls._indexing_instance is None:
-            raise RuntimeError("Indexing RAG engine not initialized. Call RAGEngine.initialize() first.")
-        return cls._indexing_instance
+    async def get_indexing_instance(cls, provider: str = "deepseek"):
+        if provider == "deepseek":
+            if cls._deepseek_indexing_instance is None:
+                raise RuntimeError("DeepSeek indexing RAG engine not initialized. Call RAGEngine.initialize() first.")
+            return cls._deepseek_indexing_instance
+        if provider == "google_studio":
+            if cls._google_studio_indexing_instance is None:
+                async with cls._google_init_lock:
+                    if cls._google_studio_indexing_instance is None:
+                        cls._apply_postgres_environment()
+                        cls._google_studio_indexing_instance = LightRAG(
+                            working_dir=settings.LIGHTRAG_WORKING_DIR,
+                            llm_model_func=google_studio_indexing_llm_func,
+                            embedding_func=cls._build_embedding_func(settings.EMBEDDING_DOCUMENT_PREFIX),
+                            kv_storage="PGKVStorage",
+                            vector_storage="PGVectorStorage",
+                            graph_storage="PGGraphStorage",
+                            doc_status_storage="PGDocStatusStorage",
+                            addon_params={
+                                "language": settings.SUMMARY_LANGUAGE,
+                                "entity_types": settings.ENTITY_TYPES,
+                            },
+                        )
+                        await cls._google_studio_indexing_instance.initialize_storages()
+            return cls._google_studio_indexing_instance
+        raise ValueError(f"Unsupported indexing provider: {provider}")
 
     @classmethod
     def get_query_instance(cls):

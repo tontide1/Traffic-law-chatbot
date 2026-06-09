@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import backend.api.routes as routes
 
@@ -28,18 +28,26 @@ def test_chat_uses_query_rag_for_non_streaming_requests(monkeypatch):
     fake_rag.aquery.assert_awaited_once()
 
 
-def test_documents_uses_query_rag_doc_status(monkeypatch):
+def test_documents_returns_indexed_provider(monkeypatch):
     client = make_client()
-    fake_status = SimpleNamespace(status=SimpleNamespace(value="processed"), file_path="law.pdf", content_summary="abc")
+    fake_status = SimpleNamespace(
+        status=SimpleNamespace(value="processed"),
+        file_path="law.pdf",
+        content_summary="abc",
+    )
     fake_doc_status = SimpleNamespace(get_docs_paginated=AsyncMock(return_value=((("doc-1", fake_status),), None)))
     fake_rag = SimpleNamespace(doc_status=fake_doc_status)
+    fake_store = Mock()
+    fake_store.get_all_providers = AsyncMock(return_value={"law.pdf": "google_studio"})
 
     monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+    monkeypatch.setattr(routes, "IndexingProviderStore", lambda working_dir: fake_store)
 
     response = client.get("/api/documents")
 
     assert response.status_code == 200
     assert response.json()[0]["id"] == "doc-1"
+    assert response.json()[0]["indexed_provider"] == "google_studio"
 
 
 def test_chat_streaming_keeps_sse_event_shape(monkeypatch):
