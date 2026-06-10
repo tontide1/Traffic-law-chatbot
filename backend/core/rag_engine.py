@@ -45,6 +45,7 @@ class RAGEngine:
             return cls._deepseek_indexing_instance, cls._query_instance
 
         cls._apply_postgres_environment()
+        settings.get_answer_llm_api_key()
 
         cls._deepseek_indexing_instance = LightRAG(
             working_dir=settings.LIGHTRAG_WORKING_DIR,

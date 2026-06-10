@@ -1,3 +1,5 @@
+import pytest
+
 from backend.config import Settings
 
 
@@ -7,7 +9,7 @@ def test_multi_provider_defaults_match_the_new_architecture():
     assert settings.INDEXING_LLM_BASE_URL == "https://api.deepseek.com"
     assert settings.INDEXING_LLM_MODEL == "deepseek-v4-flash"
     assert settings.INDEXING_LLM_THINKING_MODE == "disabled"
-    assert settings.ANSWER_LLM_BASE_URL == "https://openrouter.ai/api/v1"
+    assert settings.ANSWER_LLM_BASE_URL == "https://integrate.api.nvidia.com/v1"
     assert settings.ANSWER_LLM_MODEL == "openai/gpt-oss-120b"
     assert settings.EMBEDDING_BASE_URL == "http://host.docker.internal:8002/v1"
     assert settings.EMBEDDING_MODEL == "AITeamVN/Vietnamese_Embedding_v2"
@@ -16,14 +18,17 @@ def test_multi_provider_defaults_match_the_new_architecture():
     assert "Given a legal query" in settings.EMBEDDING_QUERY_PREFIX
 
 
-def test_answer_key_falls_back_to_openrouter_key():
-    settings = Settings(
-        _env_file=None,
-        OPENROUTER_API_KEY="openrouter-key",
-        ANSWER_LLM_API_KEY=None,
-    )
+def test_answer_key_requires_answer_llm_api_key():
+    settings = Settings(_env_file=None, ANSWER_LLM_API_KEY="nvidia-key")
 
-    assert settings.get_answer_llm_api_key() == "openrouter-key"
+    assert settings.get_answer_llm_api_key() == "nvidia-key"
+
+
+def test_answer_key_does_not_fall_back_to_alternative_key():
+    settings = Settings(_env_file=None)
+
+    with pytest.raises(ValueError, match="ANSWER_LLM_API_KEY is required"):
+        settings.get_answer_llm_api_key()
 
 
 def test_missing_required_provider_keys_raise_clear_errors():
@@ -39,7 +44,7 @@ def test_missing_required_provider_keys_raise_clear_errors():
     try:
         settings.get_answer_llm_api_key()
     except ValueError as exc:
-        assert str(exc) == "ANSWER_LLM_API_KEY or OPENROUTER_API_KEY is required"
+        assert str(exc) == "ANSWER_LLM_API_KEY is required"
     else:
         raise AssertionError("Expected answer API key lookup to raise")
 

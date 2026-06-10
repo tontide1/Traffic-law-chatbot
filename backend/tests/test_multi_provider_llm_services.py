@@ -39,7 +39,7 @@ def test_get_indexing_llm_client_uses_deepseek_settings(monkeypatch):
     assert created == [{"api_key": "deepseek-key", "base_url": "https://api.deepseek.com"}]
 
 
-def test_get_answer_llm_client_falls_back_to_openrouter_key(monkeypatch):
+def test_get_answer_llm_client_uses_answer_key_and_nvidia_base_url(monkeypatch):
     created = []
 
     class DummyClient:
@@ -47,13 +47,12 @@ def test_get_answer_llm_client_falls_back_to_openrouter_key(monkeypatch):
             created.append(kwargs)
 
     monkeypatch.setattr(llm_services.openai, "AsyncOpenAI", DummyClient)
-    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_API_KEY", None)
-    monkeypatch.setattr(llm_services.settings, "OPENROUTER_API_KEY", "openrouter-key")
-    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", "https://openrouter.ai/api/v1")
+    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_API_KEY", "answer-key")
+    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
 
     llm_services.get_answer_llm_client()
 
-    assert created == [{"api_key": "openrouter-key", "base_url": "https://openrouter.ai/api/v1"}]
+    assert created == [{"api_key": "answer-key", "base_url": "https://integrate.api.nvidia.com/v1"}]
 
 
 def test_indexing_llm_func_disables_thinking(monkeypatch):
@@ -131,7 +130,7 @@ def test_answer_client_factory_memoizes_until_reset(monkeypatch):
 
     monkeypatch.setattr(llm_services.openai, "AsyncOpenAI", DummyClient)
     monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_API_KEY", "answer-key")
-    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", "https://openrouter.ai/api/v1")
+    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
 
     first = llm_services.get_answer_llm_client()
     second = llm_services.get_answer_llm_client()
