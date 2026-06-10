@@ -64,6 +64,16 @@ def get_embedding_client():
     return _embedding_client
 
 
+# LightRAG passes these internal kwargs to every LLM func — strip them before
+# forwarding to the OpenAI client, which doesn't know about them.
+_LIGHTRAG_INTERNAL_KWARGS = {"hashing_kv", "mode", "json_mode"}
+
+
+def _filter_kwargs(kwargs: dict) -> dict:
+    """Remove LightRAG-internal keys and the 'model' override from kwargs."""
+    return {k: v for k, v in kwargs.items() if k not in _LIGHTRAG_INTERNAL_KWARGS and k != "model"}
+
+
 def _base_messages(prompt: str, system_prompt: str = None, history: List[dict] = None):
     messages = []
     if system_prompt:
@@ -97,7 +107,6 @@ class VLLMEmbeddingFunc:
             response = await client.embeddings.create(
                 model=self.model_name,
                 input=f"{self.prefix}{text}",
-                dimensions=settings.EMBEDDING_DIM,
             )
             vectors.append(response.data[0].embedding)
         return np.array(vectors)
@@ -107,11 +116,13 @@ async def indexing_llm_func(
     prompt: str,
     system_prompt: str = None,
     history: List[dict] = None,
+    history_messages: List[dict] = None,
     **kwargs,
 ) -> str | AsyncIterator[str]:
     client = get_indexing_llm_client()
-    messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
-    request_kwargs = {k: v for k, v in kwargs.items() if k != "model"}
+    effective_history = history or history_messages
+    messages = _base_messages(prompt, system_prompt=system_prompt, history=effective_history)
+    request_kwargs = _filter_kwargs(kwargs)
     extra_body = dict(request_kwargs.pop("extra_body", {}) or {})
     extra_body["thinking"] = {"type": settings.INDEXING_LLM_THINKING_MODE}
 
@@ -128,11 +139,13 @@ async def google_studio_indexing_llm_func(
     prompt: str,
     system_prompt: str = None,
     history: List[dict] = None,
+    history_messages: List[dict] = None,
     **kwargs,
 ) -> str | AsyncIterator[str]:
     client = get_google_studio_llm_client()
-    messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
-    request_kwargs = {k: v for k, v in kwargs.items() if k != "model"}
+    effective_history = history or history_messages
+    messages = _base_messages(prompt, system_prompt=system_prompt, history=effective_history)
+    request_kwargs = _filter_kwargs(kwargs)
 
     response = await client.chat.completions.create(
         model=settings.GOOGLE_STUDIO_MODEL,
@@ -146,14 +159,17 @@ async def answer_llm_func(
     prompt: str,
     system_prompt: str = None,
     history: List[dict] = None,
+    history_messages: List[dict] = None,
     **kwargs,
 ) -> str | AsyncIterator[str]:
     client = get_answer_llm_client()
-    messages = _base_messages(prompt, system_prompt=system_prompt, history=history)
+    effective_history = history or history_messages
+    messages = _base_messages(prompt, system_prompt=system_prompt, history=effective_history)
+    request_kwargs = _filter_kwargs(kwargs)
 
     response = await client.chat.completions.create(
         model=settings.ANSWER_LLM_MODEL,
         messages=messages,
-        **kwargs,
+        **request_kwargs,
     )
-    return _stream_or_content(response, stream=bool(kwargs.get("stream")))
+    return _stream_or_content(response, stream=bool(request_kwargs.get("stream")))

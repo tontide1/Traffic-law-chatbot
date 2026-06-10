@@ -10,7 +10,7 @@ def test_multi_provider_defaults_match_the_new_architecture():
     assert settings.ANSWER_LLM_BASE_URL == "https://openrouter.ai/api/v1"
     assert settings.ANSWER_LLM_MODEL == "openai/gpt-oss-120b"
     assert settings.EMBEDDING_BASE_URL == "http://host.docker.internal:8002/v1"
-    assert settings.EMBEDDING_MODEL == "Qwen/Qwen3-Embedding-0.6B"
+    assert settings.EMBEDDING_MODEL == "AITeamVN/Vietnamese_Embedding_v2"
     assert settings.EMBEDDING_DIM == 1024
     assert settings.EMBEDDING_DOCUMENT_PREFIX == ""
     assert "Given a legal query" in settings.EMBEDDING_QUERY_PREFIX
@@ -47,10 +47,10 @@ def test_missing_required_provider_keys_raise_clear_errors():
 def test_entity_types_string_parsing_still_works():
     settings = Settings(
         _env_file=None,
-        ENTITY_TYPES='["Điều khoản", "Văn bản pháp luật"]',
+        RAG_ENTITY_TYPES='["Điều khoản", "Văn bản pháp luật"]',
     )
 
-    assert settings.ENTITY_TYPES == ["Điều khoản", "Văn bản pháp luật"]
+    assert settings.RAG_ENTITY_TYPES == ["Điều khoản", "Văn bản pháp luật"]
 
 
 def test_google_studio_defaults_match_indexing_provider_selector_plan():
@@ -69,4 +69,3 @@ def test_missing_google_studio_key_raises_clear_error():
         assert str(exc) == "GOOGLE_STUDIO_API_KEY is required"
     else:
         raise AssertionError("Expected Google Studio API key lookup to raise")
-

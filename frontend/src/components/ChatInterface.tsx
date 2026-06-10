@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import ReferenceCard from './ReferenceCard'
 import client from '../api/client'
+import { getApiBaseUrl } from '../lib/apiBaseUrl'
 
 interface Message {
   id: string
@@ -55,7 +56,7 @@ export default function ChatInterface({ comparisonMode }: { comparisonMode: bool
     setMessages(prev => [...prev, assistantMessage])
 
     try {
-      const response = await fetch(`${(import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/chat`, {
+      const response = await fetch(`${getApiBaseUrl()}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

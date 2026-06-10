@@ -72,12 +72,12 @@ def test_indexing_llm_func_disables_thinking(monkeypatch):
     assert kwargs["extra_body"]["thinking"] == {"type": "disabled"}
 
 
-def test_vllm_embedding_func_uses_local_endpoint_and_prefix(monkeypatch):
+def test_vllm_embedding_func_uses_local_endpoint_and_prefix_without_forcing_dimensions(monkeypatch):
     create = AsyncMock(return_value=FakeEmbeddingResponse([0.1, 0.2, 0.3]))
     client = SimpleNamespace(embeddings=SimpleNamespace(create=create))
 
     monkeypatch.setattr(llm_services, "get_embedding_client", lambda: client)
-    monkeypatch.setattr(llm_services.settings, "EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
+    monkeypatch.setattr(llm_services.settings, "EMBEDDING_MODEL", "AITeamVN/Vietnamese_Embedding_v2")
     monkeypatch.setattr(llm_services.settings, "EMBEDDING_DIM", 1024)
 
     embedding_func = llm_services.VLLMEmbeddingFunc(prefix="search_query: ")
@@ -86,9 +86,8 @@ def test_vllm_embedding_func_uses_local_endpoint_and_prefix(monkeypatch):
     assert isinstance(result, np.ndarray)
     assert result.shape == (1, 3)
     create.assert_awaited_once_with(
-        model="Qwen/Qwen3-Embedding-0.6B",
+        model="AITeamVN/Vietnamese_Embedding_v2",
         input="search_query: tốc độ tối đa là bao nhiêu",
-        dimensions=1024,
     )
 
 
@@ -231,4 +230,3 @@ def test_google_studio_indexing_llm_func_sends_correct_payload(monkeypatch):
     kwargs = create.await_args.kwargs
     assert kwargs["model"] == "gemini-2.5-flash"
     assert kwargs["messages"][-1]["content"] == "build graph"
-

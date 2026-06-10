@@ -54,9 +54,11 @@ class RAGEngine:
             vector_storage="PGVectorStorage",
             graph_storage="PGGraphStorage",
             doc_status_storage="PGDocStatusStorage",
+            entity_extraction_use_json=True,
             addon_params={
                 "language": settings.SUMMARY_LANGUAGE,
-                "entity_types": settings.ENTITY_TYPES,
+                "entity_types": settings.RAG_ENTITY_TYPES,
+                "entity_types_guidance": ", ".join(settings.RAG_ENTITY_TYPES),
             },
         )
         await cls._deepseek_indexing_instance.initialize_storages()
@@ -69,9 +71,11 @@ class RAGEngine:
             vector_storage="PGVectorStorage",
             graph_storage="PGGraphStorage",
             doc_status_storage="PGDocStatusStorage",
+            entity_extraction_use_json=True,
             addon_params={
                 "language": settings.SUMMARY_LANGUAGE,
-                "entity_types": settings.ENTITY_TYPES,
+                "entity_types": settings.RAG_ENTITY_TYPES,
+                "entity_types_guidance": ", ".join(settings.RAG_ENTITY_TYPES),
             },
         )
         await cls._query_instance.initialize_storages()
@@ -97,9 +101,11 @@ class RAGEngine:
                             vector_storage="PGVectorStorage",
                             graph_storage="PGGraphStorage",
                             doc_status_storage="PGDocStatusStorage",
+                            entity_extraction_use_json=True,
                             addon_params={
                                 "language": settings.SUMMARY_LANGUAGE,
-                                "entity_types": settings.ENTITY_TYPES,
+                                "entity_types": settings.RAG_ENTITY_TYPES,
+                                "entity_types_guidance": ", ".join(settings.RAG_ENTITY_TYPES),
                             },
                         )
                         await cls._google_studio_indexing_instance.initialize_storages()

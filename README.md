@@ -30,7 +30,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
 - **Backend**: Python 3.11, FastAPI, `lightrag-hku`
 - **Frontend**: Vite, React, TypeScript, Tailwind CSS, Shadcn UI
 - **Database**: PostgreSQL with `pgvector` (Vector) and `Apache AGE` (Graph)
-- **LLM/Embeddings**: DeepSeek-V4-Flash (KG indexing), `openai/gpt-oss-120b` via OpenRouter (answers), `Qwen/Qwen3-Embedding-0.6B` via local vLLM (embeddings)
+- **LLM/Embeddings**: DeepSeek-V4-Flash (KG indexing), `openai/gpt-oss-120b` via OpenRouter (answers), `AITeamVN/Vietnamese_Embedding_v2` via local vLLM (embeddings)
 - **Deployment**: Docker Compose
 
 ## 📦 Getting Started
@@ -55,7 +55,7 @@ INDEXING_LLM_MODEL=deepseek-v4-flash
 ANSWER_LLM_BASE_URL=https://openrouter.ai/api/v1
 ANSWER_LLM_MODEL=openai/gpt-oss-120b
 EMBEDDING_BASE_URL=http://host.docker.internal:8002/v1
-EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
+EMBEDDING_MODEL=AITeamVN/Vietnamese_Embedding_v2
 EMBEDDING_DIM=1024
 ```
 
@@ -71,7 +71,7 @@ Google Studio indexing uses the Gemini OpenAI-compatible endpoint. Set `GOOGLE_S
 2. **Start the local embedding service (Host Machine)**:
    For NVIDIA GeForce GTX 1660 Super and other Turing-based GTX 16-series GPUs, use:
    ```bash
-   vllm serve Qwen/Qwen3-Embedding-0.6B --runner pooling --port 8002 --dtype float16 --gpu-memory-utilization 0.75 --max-model-len 2048 --attention-backend TRITON_ATTN
+   vllm serve AITeamVN/Vietnamese_Embedding_v2 --runner pooling --port 8002 --dtype float16 --gpu-memory-utilization 0.75 --max-model-len 2048 --attention-backend TRITON_ATTN
    ```
 
 3. **Start the Frontend (Locally)**:
@@ -97,7 +97,7 @@ The system consists of three main services:
 
 The RAG engine is optimized for Vietnamese:
 - `SUMMARY_LANGUAGE`: Set to `Vietnamese`.
-- `ENTITY_TYPES`: Custom legal taxonomy including *Hành vi vi phạm, Hình thức xử phạt, Khái niệm pháp lý*.
+- `RAG_ENTITY_TYPES`: Custom legal taxonomy including *Hành vi vi phạm, Hình thức xử phạt, Khái niệm pháp lý*.
 
 ## 🌍 Recommended Embedding Models
 
@@ -106,7 +106,7 @@ For the best performance with Vietnamese legal text, consider these alternative 
 - **[GreenNode-Embedding-Large-VN-Mixed-V1](https://huggingface.co/GreenNode/GreenNode-Embedding-Large-VN-Mixed-V1)**: Specialized embedding for Vietnamese language tasks.
 
 > [!IMPORTANT]
-> The new `Qwen/Qwen3-Embedding-0.6B` embedding model uses a `1024`-dimensional vector instead of the previous `1536` dimensions. Existing vector data must be re-indexed after this migration.
+> Changing the embedding model requires clearing existing vector data and re-indexing documents before querying again. Do not mix vectors from different embedding models in the same database.
 
 ---
 

@@ -40,12 +40,18 @@ services:
       - ANSWER_LLM_MODEL=${ANSWER_LLM_MODEL:-openai/gpt-oss-120b}
       - EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-http://host.docker.internal:8002/v1}
       - EMBEDDING_API_KEY=${EMBEDDING_API_KEY:-EMPTY}
-      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-AITeamVN/Vietnamese_Embedding_v2}
       - EMBEDDING_DIM=${EMBEDDING_DIM:-1024}
       - EMBEDDING_MAX_TOKEN_SIZE=${EMBEDDING_MAX_TOKEN_SIZE:-512}
       - LIGHTRAG_WORKING_DIR=/app/backend/data
       - SUMMARY_LANGUAGE=Vietnamese
-      - 'ENTITY_TYPES=["Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"]'
+      - 'RAG_ENTITY_TYPES=["Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"]'
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
     depends_on:
       - db
 
@@ -73,11 +79,10 @@ services:
       - ANSWER_LLM_MODEL=${ANSWER_LLM_MODEL:-openai/gpt-oss-120b}
       - EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-http://host.docker.internal:8002/v1}
       - EMBEDDING_API_KEY=${EMBEDDING_API_KEY:-EMPTY}
-      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-AITeamVN/Vietnamese_Embedding_v2}
       - EMBEDDING_DIM=${EMBEDDING_DIM:-1024}
       - LIGHTRAG_WORKING_DIR=/app/backend/data
       - SUMMARY_LANGUAGE=Vietnamese
-      - 'ENTITY_TYPES=["Văn bản pháp luật", "Điều khoản", "Cơ quan ban hành", "Đối tượng áp dụng", "Hành vi vi phạm", "Hình thức xử phạt", "Thời hạn", "Khái niệm pháp lý"]'
       - LIGHTRAG_KV_STORAGE=PGKVStorage
       - LIGHTRAG_VECTOR_STORAGE=PGVectorStorage
       - LIGHTRAG_GRAPH_STORAGE=PGGraphStorage
@@ -99,7 +104,21 @@ services:
       - EMBEDDING_BINDING_HOST=${EMBEDDING_BASE_URL:-http://host.docker.internal:8002/v1}
     command: lightrag-server --host 0.0.0.0 --port 8001 --working-dir /app/backend/data
     depends_on:
-      - db
+      backend:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+      - VITE_API_URL=http://localhost:8000/api
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

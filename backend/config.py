@@ -33,7 +33,7 @@ class Settings(BaseSettings):
 
     EMBEDDING_BASE_URL: str = "http://host.docker.internal:8002/v1"
     EMBEDDING_API_KEY: str = "EMPTY"
-    EMBEDDING_MODEL: str = "Qwen/Qwen3-Embedding-0.6B"
+    EMBEDDING_MODEL: str = "AITeamVN/Vietnamese_Embedding_v2"
     EMBEDDING_DIM: int = 1024
     EMBEDDING_MAX_TOKEN_SIZE: int = 512
     EMBEDDING_QUERY_PREFIX: str = (
@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     EMBEDDING_DOCUMENT_PREFIX: str = ""
 
     SUMMARY_LANGUAGE: str = "Vietnamese"
-    ENTITY_TYPES: list[str] = [
+    RAG_ENTITY_TYPES: list[str] = [
         "Văn bản pháp luật",
         "Điều khoản",
         "Cơ quan ban hành",
@@ -55,7 +55,7 @@ class Settings(BaseSettings):
 
     LIGHTRAG_WORKING_DIR: str = "./backend/data"
 
-    @field_validator("ENTITY_TYPES", mode="before")
+    @field_validator("RAG_ENTITY_TYPES", mode="before")
     @classmethod
     def parse_entity_types(cls, value):
         if isinstance(value, str):
