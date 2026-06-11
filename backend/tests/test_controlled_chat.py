@@ -75,3 +75,39 @@ async def test_relational_query_uses_hybrid_context_retrieval(monkeypatch):
 
     assert "Trách nhiệm" in result
     assert rag.aquery.await_count == 2
+
+
+@pytest.mark.anyio
+async def test_controlled_chat_streaming(monkeypatch):
+    monkeypatch.setattr(
+        controlled_chat,
+        "classify_query",
+        lambda message: QueryClass.DIRECT_DEFINITION,
+    )
+
+    async def fake_stream():
+        yield "chunk-1"
+        yield "chunk-2"
+
+    async def fake_aquery(query, param=None, system_prompt=None):
+        if param.only_need_context:
+            return "Điều 2 khoản 5: Hành lang an toàn..."
+        assert param.mode == "bypass"
+        assert param.stream is True
+        return fake_stream()
+
+    rag = SimpleNamespace(aquery=AsyncMock(side_effect=fake_aquery))
+
+    result_stream = await answer_controlled_chat(
+        rag=rag,
+        message="Hành lang an toàn là gì?",
+        stream=True,
+        reranker=FakeReranker(),
+    )
+
+    chunks = []
+    async for chunk in result_stream:
+        chunks.append(chunk)
+
+    assert chunks == ["chunk-1", "chunk-2"]
+    assert rag.aquery.await_count == 2

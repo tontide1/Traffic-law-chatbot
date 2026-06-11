@@ -10,11 +10,11 @@ from backend.core.legal_relevance import (
     select_relevant_candidates,
     split_lightrag_context,
 )
-from backend.core.query_router import classify_query, retrieval_policy_for
+from backend.core.query_router import RetrievalPolicy, classify_query, retrieval_policy_for
 from backend.core.reranker import Reranker, build_reranker, rerank_candidates
 
 
-def _build_retrieval_param(policy) -> QueryParam:
+def _build_retrieval_param(policy: RetrievalPolicy) -> QueryParam:
     return QueryParam(
         mode=policy.retrieval_mode,
         only_need_context=True,
@@ -52,7 +52,7 @@ async def answer_controlled_chat(
         system_prompt=None,
     )
 
-    candidates = split_lightrag_context(str(raw_context))
+    candidates = split_lightrag_context(str(raw_context)) if raw_context else []
     reranked = rerank_candidates(message, candidates, active_reranker)
     selected = select_relevant_candidates(
         question=message,
