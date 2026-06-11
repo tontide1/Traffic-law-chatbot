@@ -1,82 +1,118 @@
 [
   {
-    "question": "Hành lang an toàn đường bộ là gì?",
+    "id": "road-safety-corridor-definition",
+    "question": "Hành lang an toàn đường bộ được xác định từ đâu và việc thiết lập hành lang này nhằm mục đích gì?",
     "category": "exactness",
-    "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ"],
-    "required_terms": ["hành lang an toàn đường bộ", "đất của đường bộ"],
+    "query_class": "direct_definition",
+    "expected_sources": ["Luật Đường bộ"],
+    "required_terms": [
+      "dải đất dọc hai bên đất của đường bộ",
+      "tính từ mép ngoài phần đất để bảo vệ, bảo trì đường bộ",
+      "bảo đảm an toàn giao thông đường bộ",
+      "bảo đảm tầm nhìn xe chạy",
+      "hạn chế ảnh hưởng đến môi trường xung quanh"
+    ],
     "forbidden_paraphrases": ["lề đường", "giảm ảnh hưởng", "bảo vệ tầm nhìn"],
-    "expected_answer_points": ["phần đất dọc hai bên đường bộ", "bảo đảm an toàn giao thông"]
+    "forbidden_sources": ["Hiến pháp", "Điều 1", "Điều 4"],
+    "expected_answer_points": ["tính từ mép ngoài phần đất để bảo vệ, bảo trì đường bộ", "bảo đảm an toàn giao thông đường bộ"]
   },
   {
+    "id": "road-land-definition",
     "question": "Đất của đường bộ bao gồm những gì?",
     "category": "exactness",
+    "query_class": "direct_definition",
     "expected_sources": ["Luật Đường bộ"],
     "required_terms": ["đất của đường bộ", "phần đất"],
     "forbidden_paraphrases": ["lề đường thay cho đất của đường bộ"],
+    "forbidden_sources": ["Hiến pháp"],
     "expected_answer_points": ["xây dựng công trình đường bộ"]
   },
   {
+    "id": "traffic-participant-driver-definition",
     "question": "Người điều khiển phương tiện tham gia giao thông đường bộ được định nghĩa như thế nào?",
     "category": "exactness",
+    "query_class": "direct_definition",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ"],
     "required_terms": ["người điều khiển phương tiện", "tham gia giao thông"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": ["Hiến pháp"],
     "expected_answer_points": ["điều khiển phương tiện tham gia giao thông đường bộ"]
   },
   {
+    "id": "driver-definition-highway-incident-responsibility",
     "question": "Người điều khiển phương tiện tham gia giao thông đường bộ được định nghĩa như thế nào và họ có những trách nhiệm gì khi gặp sự cố trên đường cao tốc?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ"],
     "required_terms": ["người điều khiển phương tiện"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": [],
     "expected_answer_points": ["định nghĩa người điều khiển", "trách nhiệm khi gặp sự cố", "đường cao tốc"]
   },
   {
+    "id": "compare-scope-and-common-prohibitions",
     "question": "Phân biệt phạm vi điều chỉnh giữa Luật Trật tự, an toàn giao thông đường bộ và Luật Đường bộ. Có những hành vi nào bị cấm chung trong cả hai luật này không?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ", "Luật Đường bộ"],
     "required_terms": ["hành vi bị cấm"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": [],
     "expected_answer_points": ["phạm vi điều chỉnh Luật 35", "phạm vi điều chỉnh Luật 36", "hành vi bị cấm chung"]
   },
   {
+    "id": "road-state-management-responsibility",
     "question": "Cơ quan nào chịu trách nhiệm chính về quản lý nhà nước đối với đường bộ và sự phối hợp giữa Bộ Công an với Bộ Giao thông vận tải được quy định ra sao?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ", "Luật Đường bộ"],
     "required_terms": ["Bộ Công an", "Bộ Giao thông vận tải"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": [],
     "expected_answer_points": ["trách nhiệm quản lý nhà nước", "phối hợp giữa hai bộ"]
   },
   {
+    "id": "expressway-operation-condition-safety",
     "question": "Điều kiện để đưa đường cao tốc vào khai thác là gì và các quy định này liên quan thế nào đến an toàn giao thông?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ", "Luật Đường bộ"],
     "required_terms": ["đường cao tốc"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": [],
     "expected_answer_points": ["điều kiện khai thác", "an toàn giao thông"]
   },
   {
+    "id": "traffic-accident-handling-responsibility",
     "question": "Khi xảy ra tai nạn giao thông trên đường bộ, quy trình xử lý và trách nhiệm của các bên liên quan được quy định như thế nào?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ"],
     "required_terms": ["tai nạn giao thông"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": [],
     "expected_answer_points": ["quy trình xử lý", "trách nhiệm người điều khiển", "trách nhiệm cơ quan chức năng"]
   },
   {
+    "id": "corridor-prohibited-acts-road-land",
     "question": "Hành lang an toàn đường bộ liên quan gì đến các hành vi bị cấm trong phạm vi đất của đường bộ?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ", "Luật Đường bộ"],
     "required_terms": ["hành lang an toàn đường bộ", "đất của đường bộ"],
     "forbidden_paraphrases": ["lề đường"],
+    "forbidden_sources": [],
     "expected_answer_points": ["hành vi bị cấm trong hành lang", "liên quan đến đất của đường bộ"]
   },
   {
+    "id": "expressway-speed-distance-legal-basis",
     "question": "Quy định về tốc độ và khoảng cách an toàn trên đường cao tốc khác gì so với đường bộ thông thường, và cơ sở pháp lý nào chi phối?",
     "category": "graph_strength",
+    "query_class": "relational",
     "expected_sources": ["Luật Trật tự, an toàn giao thông đường bộ"],
     "required_terms": ["tốc độ", "khoảng cách an toàn"],
     "forbidden_paraphrases": [],
+    "forbidden_sources": [],
     "expected_answer_points": ["quy định tốc độ đường cao tốc", "quy định khoảng cách", "cơ sở pháp lý"]
   }
 ]

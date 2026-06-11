@@ -9,6 +9,7 @@ from backend.core.benchmark_checker import (
     check_expected_answer_points,
     check_expected_sources,
     check_forbidden_paraphrases,
+    check_forbidden_sources,
     check_required_terms,
     load_benchmark,
     normalize_text,
@@ -189,4 +190,45 @@ def test_check_answer_fails_on_forbidden():
     item = SAMPLE_FIXTURE[0]
     result = check_answer(answer, item)
     assert result["forbidden_paraphrases"]["pass"] is False
+    assert result["overall_pass"] is False
+
+
+def test_check_forbidden_sources_pass():
+    answer = "Căn cứ chính: Điều 2 khoản 5 Luật Đường bộ."
+
+    result = check_forbidden_sources(answer, ["Hiến pháp", "Điều 4"])
+
+    assert result["pass"] is True
+    assert result["found"] == []
+
+
+def test_check_forbidden_sources_fail():
+    answer = "Liên kết pháp lý liên quan: Hiến pháp là căn cứ ban hành Luật Đường bộ."
+
+    result = check_forbidden_sources(answer, ["Hiến pháp", "Điều 4"])
+
+    assert result["pass"] is False
+    assert result["found"] == ["Hiến pháp"]
+
+
+def test_check_answer_combines_forbidden_sources_with_existing_checks():
+    answer = (
+        "Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ.\n\n"
+        "**Tham chiếu**\n"
+        "- [1] Luật Đường bộ\n\n"
+        "Liên kết pháp lý liên quan: Hiến pháp là căn cứ chung."
+    )
+    item = {
+        "required_terms": ["dải đất dọc hai bên đất của đường bộ"],
+        "forbidden_paraphrases": [],
+        "forbidden_sources": ["Hiến pháp", "Điều 4"],
+        "expected_sources": ["Luật Đường bộ"],
+        "expected_answer_points": [],
+    }
+
+    result = check_answer(answer, item)
+
+    assert result["required_terms"]["pass"] is True
+    assert result["forbidden_sources"]["pass"] is False
+    assert result["forbidden_sources"]["found"] == ["Hiến pháp"]
     assert result["overall_pass"] is False
