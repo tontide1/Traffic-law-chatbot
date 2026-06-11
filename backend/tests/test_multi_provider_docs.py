@@ -1,27 +1,36 @@
 from pathlib import Path
 
+from backend.config import NVIDIA_OPENAI_COMPATIBLE_BASE_URL
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_env_example_describes_split_providers():
+def test_env_example_describes_nvidia_answer_provider():
     env_example = (REPO_ROOT / ".env.example").read_text(encoding="utf-8")
 
     assert "INDEXING_LLM_MODEL=deepseek-v4-flash" in env_example
+    assert f"ANSWER_LLM_BASE_URL={NVIDIA_OPENAI_COMPATIBLE_BASE_URL}" in env_example
+    assert "ANSWER_LLM_API_KEY=your_nvidia_api_key_here" in env_example
     assert "ANSWER_LLM_MODEL=openai/gpt-oss-120b" in env_example
     assert "EMBEDDING_MODEL=AITeamVN/Vietnamese_Embedding_v2" in env_example
     assert "EMBEDDING_BASE_URL=http://host.docker.internal:8002/v1" in env_example
     assert "openai/text-embedding-3-small" not in env_example
 
 
-def test_docker_compose_exposes_host_gateway_and_embedding_dim_1024():
+def test_docker_compose_routes_answer_traffic_to_nvidia():
     compose = (REPO_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
     assert 'host.docker.internal:host-gateway' in compose
     assert 'INDEXING_LLM_BASE_URL=${INDEXING_LLM_BASE_URL:-https://api.deepseek.com}' in compose
     assert 'INDEXING_LLM_MODEL=${INDEXING_LLM_MODEL:-deepseek-v4-flash}' in compose
     assert 'INDEXING_LLM_THINKING_MODE=${INDEXING_LLM_THINKING_MODE:-disabled}' in compose
-    assert 'ANSWER_LLM_BASE_URL=${ANSWER_LLM_BASE_URL:-https://openrouter.ai/api/v1}' in compose
+    assert f'ANSWER_LLM_BASE_URL=${{ANSWER_LLM_BASE_URL:-{NVIDIA_OPENAI_COMPATIBLE_BASE_URL}}}' in compose
     assert 'ANSWER_LLM_MODEL=${ANSWER_LLM_MODEL:-openai/gpt-oss-120b}' in compose
+    assert 'ANSWER_LLM_API_KEY=${ANSWER_LLM_API_KEY}' in compose
+    assert 'LLM_BINDING_API_KEY=${ANSWER_LLM_API_KEY}' in compose
+    assert f'LLM_BINDING_HOST=${{ANSWER_LLM_BASE_URL:-{NVIDIA_OPENAI_COMPATIBLE_BASE_URL}}}' in compose
+    assert 'QUERY_LLM_BINDING_API_KEY=${ANSWER_LLM_API_KEY}' in compose
+    assert f'QUERY_LLM_BINDING_HOST=${{ANSWER_LLM_BASE_URL:-{NVIDIA_OPENAI_COMPATIBLE_BASE_URL}}}' in compose
     assert 'EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-http://host.docker.internal:8002/v1}' in compose
     assert 'EMBEDDING_MODEL=${EMBEDDING_MODEL:-AITeamVN/Vietnamese_Embedding_v2}' in compose
     assert 'EMBEDDING_DIM=${EMBEDDING_DIM:-1024}' in compose
@@ -29,12 +38,14 @@ def test_docker_compose_exposes_host_gateway_and_embedding_dim_1024():
     assert 'EMBEDDING_BINDING_HOST=${EMBEDDING_BASE_URL:-http://host.docker.internal:8002/v1}' in compose
     assert 'EXTRACT_LLM_MODEL=${INDEXING_LLM_MODEL:-deepseek-v4-flash}' in compose
     assert 'QUERY_LLM_MODEL=${ANSWER_LLM_MODEL:-openai/gpt-oss-120b}' in compose
+    assert '${OPENROUTER_API_KEY}' not in compose
 
 
-def test_readme_describes_deepseek_openrouter_and_local_vllm():
+def test_readme_describes_deepseek_nvidia_and_local_vllm():
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "DeepSeek-V4-Flash" in readme
+    assert "NVIDIA-hosted OpenAI-compatible endpoint" in readme
     assert "openai/gpt-oss-120b" in readme
     assert "AITeamVN/Vietnamese_Embedding_v2" in readme
     assert "vLLM" in readme

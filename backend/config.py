@@ -1,7 +1,10 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 import json
+from typing import Optional
+
 from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+NVIDIA_OPENAI_COMPATIBLE_BASE_URL = "https://integrate.api.nvidia.com/v1"
 
 
 class Settings(BaseSettings):
@@ -16,14 +19,12 @@ class Settings(BaseSettings):
 
     REDIS_URL: Optional[str] = None
 
-    OPENROUTER_API_KEY: Optional[str] = None
-
     INDEXING_LLM_BASE_URL: str = "https://api.deepseek.com"
     INDEXING_LLM_API_KEY: Optional[str] = None
     INDEXING_LLM_MODEL: str = "deepseek-v4-flash"
     INDEXING_LLM_THINKING_MODE: str = "disabled"
 
-    ANSWER_LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
+    ANSWER_LLM_BASE_URL: str = NVIDIA_OPENAI_COMPATIBLE_BASE_URL
     ANSWER_LLM_API_KEY: Optional[str] = None
     ANSWER_LLM_MODEL: str = "openai/gpt-oss-120b"
 
@@ -74,10 +75,9 @@ class Settings(BaseSettings):
         return self.INDEXING_LLM_API_KEY
 
     def get_answer_llm_api_key(self) -> str:
-        key = self.ANSWER_LLM_API_KEY or self.OPENROUTER_API_KEY
-        if not key:
-            raise ValueError("ANSWER_LLM_API_KEY or OPENROUTER_API_KEY is required")
-        return key
+        if not self.ANSWER_LLM_API_KEY:
+            raise ValueError("ANSWER_LLM_API_KEY is required")
+        return self.ANSWER_LLM_API_KEY
 
     def get_google_studio_api_key(self) -> str:
         if not self.GOOGLE_STUDIO_API_KEY:

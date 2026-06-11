@@ -20,7 +20,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
   ![Comparison 4](docs/Comparison4.png)
   ![Comparison 5](docs/Comparison5.png)
 - **Hybrid RAG Retrieval**: Combined vector and graph search for precise legal grounding.
-- **Role-Specific Inference Stack**: Uses DeepSeek-V4-Flash for KG extraction, `openai/gpt-oss-120b` for answer generation, and local vLLM-served Qwen3 embeddings for retrieval.
+- **Role-Specific Inference Stack**: Uses DeepSeek-V4-Flash for KG extraction, `openai/gpt-oss-120b` through the NVIDIA-hosted OpenAI-compatible endpoint for answer generation, and `AITeamVN/Vietnamese_Embedding_v2` via local vLLM for retrieval.
 - **Modern Chat Interface**: Beautiful React UI with Markdown support and source citations.
 - **Document Inventory**: Manage and track the status of all indexed legal documents.
 - **Selectable Indexing Providers**: Users can choose `DeepSeek` or `Google Studio` from the left sidebar for new knowledge-graph builds. The project keeps one shared knowledge base, and switching providers affects only future uploads. Existing documents are not rebuilt automatically.
@@ -30,7 +30,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
 - **Backend**: Python 3.11, FastAPI, `lightrag-hku`
 - **Frontend**: Vite, React, TypeScript, Tailwind CSS, Shadcn UI
 - **Database**: PostgreSQL with `pgvector` (Vector) and `Apache AGE` (Graph)
-- **LLM/Embeddings**: DeepSeek-V4-Flash (KG indexing), `openai/gpt-oss-120b` via OpenRouter (answers), `AITeamVN/Vietnamese_Embedding_v2` via local vLLM (embeddings)
+- **LLM/Embeddings**: DeepSeek-V4-Flash (KG indexing), `openai/gpt-oss-120b` via the NVIDIA-hosted OpenAI-compatible endpoint (answers), `AITeamVN/Vietnamese_Embedding_v2` via local vLLM (embeddings)
 - **Deployment**: Docker Compose
 
 ## 📦 Getting Started
@@ -38,7 +38,7 @@ An advanced legal document assistant powered by **LightRAG**, localized for Viet
 ### Prerequisites
 
 - Docker and Docker Compose
-- OpenRouter API Key
+- NVIDIA API Key
 
 ### Environment Setup
 
@@ -48,11 +48,11 @@ Create a `.env` file in the root directory (refer to `.env.example`):
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DATABASE=law_assistant
-OPENROUTER_API_KEY=your_key_here
+ANSWER_LLM_API_KEY=your_nvidia_key_here
 INDEXING_LLM_BASE_URL=https://api.deepseek.com
 INDEXING_LLM_API_KEY=your_deepseek_key_here
 INDEXING_LLM_MODEL=deepseek-v4-flash
-ANSWER_LLM_BASE_URL=https://openrouter.ai/api/v1
+ANSWER_LLM_BASE_URL=https://integrate.api.nvidia.com/v1
 ANSWER_LLM_MODEL=openai/gpt-oss-120b
 EMBEDDING_BASE_URL=http://host.docker.internal:8002/v1
 EMBEDDING_MODEL=AITeamVN/Vietnamese_Embedding_v2
