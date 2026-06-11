@@ -29,28 +29,37 @@ def normalize_text(text: str) -> str:
 
 def _find_matching_terms(answer: str, terms: list[str]) -> list[str]:
     normalized_answer = normalize_text(answer)
-    return [term for term in terms if normalize_text(term) in normalized_answer]
+    found = []
+    for term in terms:
+        norm_term = normalize_text(term)
+        if not norm_term:
+            continue
+        # Use custom Vietnamese-safe word boundaries to prevent substring false positives
+        pattern = rf"(?<![\wÀ-ỹ]){re.escape(norm_term)}(?![\wÀ-ỹ])"
+        if re.search(pattern, normalized_answer):
+            found.append(term)
+    return found
 
 
 def check_required_terms(answer: str, terms: list[str]) -> dict:
-    found = _find_matching_terms(answer, terms)
-    missing = [term for term in terms if term not in found]
+    found = _find_matching_terms(answer, terms or [])
+    missing = [term for term in (terms or []) if term not in found]
     return {"pass": not missing, "missing": missing}
 
 
 def check_expected_answer_points(answer: str, points: list[str]) -> dict:
-    found = _find_matching_terms(answer, points)
-    missing = [point for point in points if point not in found]
+    found = _find_matching_terms(answer, points or [])
+    missing = [point for point in (points or []) if point not in found]
     return {"pass": not missing, "missing": missing}
 
 
 def check_forbidden_paraphrases(answer: str, terms: list[str]) -> dict:
-    found = _find_matching_terms(answer, terms)
+    found = _find_matching_terms(answer, terms or [])
     return {"pass": not found, "found": found}
 
 
 def check_forbidden_sources(answer: str, sources: list[str]) -> dict:
-    found = _find_matching_terms(answer, sources)
+    found = _find_matching_terms(answer, sources or [])
     return {"pass": not found, "found": found}
 
 
@@ -87,7 +96,7 @@ def check_expected_sources(answer: str, expected_sources: list[str]) -> dict:
     normalized_titles = [normalize_text(title) for title in titles]
 
     missing = []
-    for source in expected_sources:
+    for source in (expected_sources or []):
         normalized_source = normalize_text(source)
         if normalized_source not in normalized_titles:
             missing.append(source)
@@ -96,17 +105,17 @@ def check_expected_sources(answer: str, expected_sources: list[str]) -> dict:
 
 
 def check_answer(answer: str, benchmark_item: dict) -> dict:
-    required_terms = benchmark_item.get("required_terms", [])
+    required_terms = benchmark_item.get("required_terms") or []
     forbidden_paraphrases = [
-        *benchmark_item.get("forbidden_paraphrases", []),
-        *benchmark_item.get("forbidden_terms", []),
+        *(benchmark_item.get("forbidden_paraphrases") or []),
+        *(benchmark_item.get("forbidden_terms") or []),
     ]
     expected_sources = [
-        *benchmark_item.get("expected_sources", []),
-        *benchmark_item.get("required_sources", []),
+        *(benchmark_item.get("expected_sources") or []),
+        *(benchmark_item.get("required_sources") or []),
     ]
-    expected_answer_points = benchmark_item.get("expected_answer_points", [])
-    forbidden_sources = benchmark_item.get("forbidden_sources", [])
+    expected_answer_points = benchmark_item.get("expected_answer_points") or []
+    forbidden_sources = benchmark_item.get("forbidden_sources") or []
 
     required_result = check_required_terms(answer, required_terms)
     forbidden_result = check_forbidden_paraphrases(answer, forbidden_paraphrases)

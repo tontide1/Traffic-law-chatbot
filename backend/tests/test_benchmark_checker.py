@@ -54,9 +54,12 @@ def test_load_real_benchmark_fixture():
     assert EXPECTED_REAL_BENCHMARK_CATEGORIES.issubset(category_counts)
     assert all(category_counts[category] > 0 for category in EXPECTED_REAL_BENCHMARK_CATEGORIES)
     for item in items:
+        assert "id" in item
         assert "question" in item
+        assert "query_class" in item
         assert "required_terms" in item
         assert "forbidden_paraphrases" in item
+        assert "forbidden_sources" in item
         assert "expected_answer_points" in item
 
 
