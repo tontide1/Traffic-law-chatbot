@@ -86,6 +86,32 @@ The application will be available at:
 - **Backend API**: `http://localhost:8000`
 - **Graph Visualization**: `http://localhost:8001/webui`
 
+### Legal Benchmark Regression Check
+
+Use `scripts/run_regression_check.py` to run the deterministic legal benchmark against a live backend. The script loads `data/legal_benchmark.json`, sends each selected question to `POST /api/chat` with `comparison_mode=True` and `stream=False`, then checks both `naive` and `hybrid` answers for required terms, forbidden paraphrases, expected sources, and expected answer points.
+
+Run it after the backend is available at `http://localhost:8000`:
+
+```bash
+conda run -n legal_rag python scripts/run_regression_check.py
+```
+
+Useful filters and overrides:
+
+```bash
+conda run -n legal_rag python scripts/run_regression_check.py --index 0
+conda run -n legal_rag python scripts/run_regression_check.py --category exactness
+conda run -n legal_rag python scripts/run_regression_check.py --fixture path/to/benchmark.json
+conda run -n legal_rag python scripts/run_regression_check.py --api-url http://localhost:8000
+```
+
+- `--index` runs one 0-based benchmark item.
+- `--category` runs all items in a category defined by the loaded fixture. Categories are derived from the fixture, so custom benchmark files can introduce new categories.
+- `--fixture` points to a custom benchmark JSON file. The default is `data/legal_benchmark.json`.
+- `--api-url` changes the backend base URL. The default is `http://localhost:8000`.
+
+The script exits with code `1` when any answer check fails or the API response shape is invalid, making it suitable for manual regression checks before merging RAG prompt or retrieval changes.
+
 ## 🧠 Architecture
 
 The system consists of three main services:
