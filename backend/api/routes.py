@@ -11,6 +11,8 @@ import shutil
 import os
 from backend.config import settings
 from backend.core.indexing_provider_store import IndexingProviderStore
+from backend.core.controlled_chat import answer_controlled_chat
+
 
 router = APIRouter()
 
@@ -47,10 +49,10 @@ async def chat(request: ChatRequest):
                     hybrid=ChatResponse(response=hybrid_response, mode="hybrid")
                 )
             else:
-                response = await rag.aquery(
-                    request.message,
-                    param=QueryParam(mode="hybrid"),
-                    system_prompt=hybrid_system_prompt,
+                response = await answer_controlled_chat(
+                    rag=rag,
+                    message=request.message,
+                    stream=False,
                 )
                 return ChatResponse(response=response, mode="hybrid")
         except Exception as e:
@@ -113,10 +115,10 @@ async def chat(request: ChatRequest):
                 yield f"data: {json.dumps({'type': 'done'})}\n\n"
             else:
                 # Standard single stream
-                generator = await rag.aquery(
-                    request.message,
-                    param=QueryParam(mode="hybrid", stream=True),
-                    system_prompt=hybrid_system_prompt,
+                generator = await answer_controlled_chat(
+                    rag=rag,
+                    message=request.message,
+                    stream=True,
                 )
                 if hasattr(generator, '__aiter__'):
                     async for chunk in generator:
