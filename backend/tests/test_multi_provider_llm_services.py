@@ -161,6 +161,20 @@ def test_answer_llm_func_does_not_inject_thinking(monkeypatch):
     assert "extra_body" not in kwargs or "thinking" not in (kwargs.get("extra_body") or {})
 
 
+def test_answer_llm_func_filters_lightrag_enable_cot_kwarg(monkeypatch):
+    create = AsyncMock(return_value=FakeChatResponse("answer"))
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+
+    monkeypatch.setattr(llm_services, "get_answer_llm_client", lambda: client)
+    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_MODEL", "openai/gpt-oss-120b")
+
+    result = asyncio.run(llm_services.answer_llm_func("legal question", enable_cot=True))
+
+    assert result == "answer"
+    kwargs = create.await_args.kwargs
+    assert "enable_cot" not in kwargs
+
+
 def test_streaming_response_yields_delta_contents():
     class FakeDelta:
         def __init__(self, content):

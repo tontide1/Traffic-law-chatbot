@@ -66,7 +66,7 @@ def get_embedding_client():
 
 # LightRAG passes these internal kwargs to every LLM func — strip them before
 # forwarding to the OpenAI client, which doesn't know about them.
-_LIGHTRAG_INTERNAL_KWARGS = {"hashing_kv", "mode", "json_mode"}
+_LIGHTRAG_INTERNAL_KWARGS = {"hashing_kv", "mode", "json_mode", "enable_cot"}
 
 
 def _filter_kwargs(kwargs: dict) -> dict:
