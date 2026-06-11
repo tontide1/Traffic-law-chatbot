@@ -1,0 +1,147 @@
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
+import backend.api.routes as routes
+from backend.core.legal_prompts import build_legal_system_prompt
+
+
+def make_client() -> TestClient:
+    app = FastAPI()
+    app.include_router(routes.router, prefix="/api")
+    return TestClient(app)
+
+
+def _call_by_mode(mock: AsyncMock, mode: str):
+    for awaited_call in mock.await_args_list:
+        param = awaited_call.kwargs["param"]
+        if param.mode == mode:
+            return awaited_call
+    raise AssertionError(f"Missing awaited call for mode={mode!r}")
+
+
+def _assert_legal_query_call(awaited_call, message: str, mode: str, system_prompt: str, stream: bool = False):
+    assert awaited_call.args == (message,)
+    assert awaited_call.kwargs["system_prompt"] == system_prompt
+    assert awaited_call.kwargs["param"].mode == mode
+    assert awaited_call.kwargs["param"].stream == stream
+
+
+def test_chat_passes_hybrid_legal_prompt_for_non_streaming_requests(monkeypatch):
+    client = make_client()
+    fake_rag = SimpleNamespace(aquery=AsyncMock(return_value="Câu trả lời"))
+
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Tốc độ tối đa là bao nhiêu?", "stream": False, "comparison_mode": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["response"] == "Câu trả lời"
+    _assert_legal_query_call(
+        fake_rag.aquery.await_args_list[0],
+        "Tốc độ tối đa là bao nhiêu?",
+        "hybrid",
+        build_legal_system_prompt("hybrid"),
+    )
+
+
+def test_chat_passes_hybrid_legal_prompt_for_streaming_requests(monkeypatch):
+    client = make_client()
+
+    async def fake_stream():
+        yield "chunk-1"
+
+    fake_rag = SimpleNamespace(aquery=AsyncMock(return_value=fake_stream()))
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Cho tôi câu trả lời", "stream": True, "comparison_mode": False},
+    )
+
+    assert response.status_code == 200
+    assert 'data: {"type": "chunk", "mode": "hybrid", "content": "chunk-1"}' in response.text
+    assert 'data: {"type": "done"}' in response.text
+    _assert_legal_query_call(
+        fake_rag.aquery.await_args_list[0],
+        "Cho tôi câu trả lời",
+        "hybrid",
+        build_legal_system_prompt("hybrid"),
+        stream=True,
+    )
+
+
+def test_chat_passes_mode_specific_legal_prompts_for_comparison_requests(monkeypatch):
+    client = make_client()
+    fake_rag = SimpleNamespace(aquery=AsyncMock(side_effect=["Naive answer", "Hybrid answer"]))
+
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Quy định nồng độ cồn thế nào?", "stream": False, "comparison_mode": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["naive"]["response"] == "Naive answer"
+    assert response.json()["hybrid"]["response"] == "Hybrid answer"
+    _assert_legal_query_call(
+        _call_by_mode(fake_rag.aquery, "naive"),
+        "Quy định nồng độ cồn thế nào?",
+        "naive",
+        build_legal_system_prompt("naive"),
+    )
+    _assert_legal_query_call(
+        _call_by_mode(fake_rag.aquery, "hybrid"),
+        "Quy định nồng độ cồn thế nào?",
+        "hybrid",
+        build_legal_system_prompt("hybrid"),
+    )
+
+
+def test_chat_passes_mode_specific_legal_prompts_for_streaming_comparison_requests(monkeypatch):
+    client = make_client()
+
+    async def naive_stream():
+        yield "naive-1"
+
+    async def hybrid_stream():
+        yield "hybrid-1"
+
+    async def fake_aquery(query, param=None, system_prompt=None):
+        if param.mode == "naive":
+            return naive_stream()
+        if param.mode == "hybrid":
+            return hybrid_stream()
+        raise AssertionError(f"Unexpected mode: {param.mode!r}")
+
+    fake_rag = SimpleNamespace(aquery=AsyncMock(side_effect=fake_aquery))
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Quy định nồng độ cồn thế nào?", "stream": True, "comparison_mode": True},
+    )
+
+    assert response.status_code == 200
+    assert 'data: {"type": "chunk", "mode": "naive", "content": "naive-1"}' in response.text
+    assert 'data: {"type": "chunk", "mode": "hybrid", "content": "hybrid-1"}' in response.text
+    assert 'data: {"type": "done"}' in response.text
+    _assert_legal_query_call(
+        _call_by_mode(fake_rag.aquery, "naive"),
+        "Quy định nồng độ cồn thế nào?",
+        "naive",
+        build_legal_system_prompt("naive"),
+        stream=True,
+    )
+    _assert_legal_query_call(
+        _call_by_mode(fake_rag.aquery, "hybrid"),
+        "Quy định nồng độ cồn thế nào?",
+        "hybrid",
+        build_legal_system_prompt("hybrid"),
+        stream=True,
+    )

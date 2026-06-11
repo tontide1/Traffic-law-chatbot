@@ -3,9 +3,10 @@ from backend.api.schemas import ChatRequest, ChatResponse, ComparisonResponse, U
 from fastapi.responses import StreamingResponse
 import json
 import asyncio
-from lightrag import LightRAG, QueryParam
+from lightrag import QueryParam
 from backend.core.rag_engine import RAGEngine
 from backend.core.document_parser import parse_pdf_to_markdown
+from backend.core.legal_prompts import build_legal_system_prompt
 import shutil
 import os
 from backend.config import settings
@@ -21,33 +22,36 @@ def resolve_indexing_provider(provider: str | None) -> str:
         raise HTTPException(status_code=400, detail=f"Unsupported indexing provider: {provider}")
     return value
 
-
-from typing import Union
-
 @router.post("/chat")
 async def chat(request: ChatRequest):
     rag = RAGEngine.get_query_instance()
+    naive_system_prompt = build_legal_system_prompt("naive")
+    hybrid_system_prompt = build_legal_system_prompt("hybrid")
     print(f"DEBUG: Chat request received. message='{request.message[:20]}...', comparison_mode={request.comparison_mode}, stream={request.stream}")
-    
-    system_prompt = (
-        "STRICT INSTRUCTION: Output ONLY the relevant information. "
-        "DO NOT use introductory phrases like 'Dựa trên thông tin được cung cấp...', 'Dưới đây là...', etc. "
-        "Directly provide the answer based on the context."
-    )
-    
-    full_query = f"{request.message}\n\n{system_prompt}"
-    
+
     if not request.stream:
         try:
             if request.comparison_mode:
-                naive_response = await rag.aquery(full_query, param=QueryParam(mode="naive"))
-                hybrid_response = await rag.aquery(full_query, param=QueryParam(mode="hybrid"))
+                naive_response = await rag.aquery(
+                    request.message,
+                    param=QueryParam(mode="naive"),
+                    system_prompt=naive_system_prompt,
+                )
+                hybrid_response = await rag.aquery(
+                    request.message,
+                    param=QueryParam(mode="hybrid"),
+                    system_prompt=hybrid_system_prompt,
+                )
                 return ComparisonResponse(
                     naive=ChatResponse(response=naive_response, mode="naive"),
                     hybrid=ChatResponse(response=hybrid_response, mode="hybrid")
                 )
             else:
-                response = await rag.aquery(full_query, param=QueryParam(mode="hybrid"))
+                response = await rag.aquery(
+                    request.message,
+                    param=QueryParam(mode="hybrid"),
+                    system_prompt=hybrid_system_prompt,
+                )
                 return ChatResponse(response=response, mode="hybrid")
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -73,8 +77,26 @@ async def chat(request: ChatRequest):
         try:
             if request.comparison_mode:
                 # Start both in parallel
-                t1 = asyncio.create_task(stream_wrapper(rag.aquery(full_query, param=QueryParam(mode="naive", stream=True)), "naive"))
-                t2 = asyncio.create_task(stream_wrapper(rag.aquery(full_query, param=QueryParam(mode="hybrid", stream=True)), "hybrid"))
+                t1 = asyncio.create_task(
+                    stream_wrapper(
+                        rag.aquery(
+                            request.message,
+                            param=QueryParam(mode="naive", stream=True),
+                            system_prompt=naive_system_prompt,
+                        ),
+                        "naive",
+                    )
+                )
+                t2 = asyncio.create_task(
+                    stream_wrapper(
+                        rag.aquery(
+                            request.message,
+                            param=QueryParam(mode="hybrid", stream=True),
+                            system_prompt=hybrid_system_prompt,
+                        ),
+                        "hybrid",
+                    )
+                )
                 pending_tasks.update([t1, t2])
                 
                 while pending_tasks:
@@ -91,7 +113,11 @@ async def chat(request: ChatRequest):
                 yield f"data: {json.dumps({'type': 'done'})}\n\n"
             else:
                 # Standard single stream
-                generator = await rag.aquery(full_query, param=QueryParam(mode="hybrid", stream=True))
+                generator = await rag.aquery(
+                    request.message,
+                    param=QueryParam(mode="hybrid", stream=True),
+                    system_prompt=hybrid_system_prompt,
+                )
                 if hasattr(generator, '__aiter__'):
                     async for chunk in generator:
                         yield f"data: {json.dumps({'type': 'chunk', 'mode': 'hybrid', 'content': chunk})}\n\n"
