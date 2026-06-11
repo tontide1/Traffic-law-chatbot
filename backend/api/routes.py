@@ -101,18 +101,23 @@ async def chat(request: ChatRequest):
                 )
                 pending_tasks.update([t1, t2])
                 
-                while pending_tasks:
-                    # Wait for items in queue or for tasks to finish
-                    while not queue.empty():
-                        yield await queue.get()
+                try:
+                    while pending_tasks:
+                        # Wait for items in queue or for tasks to finish
+                        while not queue.empty():
+                            yield await queue.get()
+                        
+                        done, pending_tasks = await asyncio.wait(pending_tasks, timeout=0.1, return_when=asyncio.FIRST_COMPLETED)
+                        
+                        # Yield any new items added during wait
+                        while not queue.empty():
+                            yield await queue.get()
                     
-                    done, pending_tasks = await asyncio.wait(pending_tasks, timeout=0.1, return_when=asyncio.FIRST_COMPLETED)
-                    
-                    # Yield any new items added during wait
-                    while not queue.empty():
-                        yield await queue.get()
-                
-                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                finally:
+                    for task in (t1, t2):
+                        if not task.done():
+                            task.cancel()
             else:
                 # Standard single stream
                 generator = await answer_controlled_chat(

@@ -75,17 +75,37 @@ class BGEReranker:
         return sorted(rescored, key=lambda item: item.score, reverse=True)
 
 
+_cached_reranker: Reranker | None = None
+
+
 def build_reranker() -> Reranker:
+    global _cached_reranker
+    if _cached_reranker is not None:
+        is_noop = isinstance(_cached_reranker, NoOpReranker)
+        should_be_noop = not settings.RERANKER_ENABLED
+        if is_noop == should_be_noop:
+            if is_noop:
+                return _cached_reranker
+            cfg = _cached_reranker.config
+            if (
+                cfg.model == settings.RERANKER_MODEL
+                and cfg.max_length == settings.RERANKER_MAX_LENGTH
+                and cfg.device == settings.RERANKER_DEVICE
+            ):
+                return _cached_reranker
+
     if not settings.RERANKER_ENABLED:
-        return NoOpReranker()
-    return BGEReranker(
-        RerankerConfig(
-            enabled=settings.RERANKER_ENABLED,
-            model=settings.RERANKER_MODEL,
-            max_length=settings.RERANKER_MAX_LENGTH,
-            device=settings.RERANKER_DEVICE,
+        _cached_reranker = NoOpReranker()
+    else:
+        _cached_reranker = BGEReranker(
+            RerankerConfig(
+                enabled=settings.RERANKER_ENABLED,
+                model=settings.RERANKER_MODEL,
+                max_length=settings.RERANKER_MAX_LENGTH,
+                device=settings.RERANKER_DEVICE,
+            )
         )
-    )
+    return _cached_reranker
 
 
 def rerank_candidates(
