@@ -75,6 +75,14 @@ def _preview(text: str, limit: int = PREVIEW_LENGTH) -> str:
     return f"{collapsed[: limit - 3]}..."
 
 
+def build_payload(question: str) -> dict[str, object]:
+    return {
+        "message": question,
+        "stream": False,
+        "comparison_mode": True,
+    }
+
+
 def _extract_comparison_answer(payload: dict[str, Any], mode: str) -> str:
     item = payload.get(mode)
     if not isinstance(item, dict):
@@ -134,6 +142,7 @@ def _print_check(mode: str, result: dict[str, Any]) -> bool:
     forbidden_paraphrases = check["forbidden_paraphrases"]
     expected_sources = check["expected_sources"]
     expected_answer_points = check["expected_answer_points"]
+    forbidden_sources = check.get("forbidden_sources", {"pass": True, "found": []})
     passed = bool(check["overall_pass"])
     status = "PASS" if passed else "FAIL"
     print(f"  [{mode}] {status}")
@@ -142,6 +151,8 @@ def _print_check(mode: str, result: dict[str, Any]) -> bool:
         print(f"    missing required terms: {required_terms['missing']}")
     if not forbidden_paraphrases["pass"]:
         print(f"    forbidden paraphrases found: {forbidden_paraphrases['found']}")
+    if not forbidden_sources["pass"]:
+        print(f"    forbidden sources found: {forbidden_sources['found']}")
     if not expected_sources["pass"]:
         print(f"    missing expected sources: {expected_sources['missing']}")
     if not expected_answer_points["pass"]:
@@ -199,11 +210,7 @@ def main() -> int:
 
                 response = client.post(
                     "/api/chat",
-                    json={
-                        "message": question,
-                        "stream": False,
-                        "comparison_mode": True,
-                    },
+                    json=build_payload(question),
                 )
                 response.raise_for_status()
                 payload = response.json()
