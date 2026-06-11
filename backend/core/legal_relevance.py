@@ -1,6 +1,7 @@
 """Legal relevance filtering for retrieved LightRAG context."""
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -23,24 +24,24 @@ class ContextCandidate:
     label: CandidateLabel | None = None
 
 
-_BACKGROUND_PATTERNS = (
-    "hiến pháp",
-    "phạm vi điều chỉnh",
-    "chính sách phát triển",
-    "chính sách chung",
-    "căn cứ ban hành",
-    "quản lý nhà nước",
-    "điều 1",
-    "điều 4",
+_BACKGROUND_REGEXES = (
+    re.compile(r"hiến pháp"),
+    re.compile(r"phạm vi điều chỉnh"),
+    re.compile(r"chính sách phát triển"),
+    re.compile(r"chính sách chung"),
+    re.compile(r"căn cứ ban hành"),
+    re.compile(r"quản lý nhà nước"),
+    re.compile(r"\bđiều 1(?!\d)"),
+    re.compile(r"\bđiều 4(?!\d)"),
 )
 
-_BACKGROUND_REQUEST_PATTERNS = (
-    "phạm vi điều chỉnh",
-    "chính sách",
-    "hiến pháp",
-    "căn cứ ban hành",
-    "điều 1",
-    "điều 4",
+_BACKGROUND_REQUEST_REGEXES = (
+    re.compile(r"phạm vi điều chỉnh"),
+    re.compile(r"chính sách"),
+    re.compile(r"hiến pháp"),
+    re.compile(r"căn cứ ban hành"),
+    re.compile(r"\bđiều 1(?!\d)"),
+    re.compile(r"\bđiều 4(?!\d)"),
 )
 
 _DIRECT_DEFINITION_PATTERNS = (
@@ -67,17 +68,18 @@ _SUPPORTING_PATTERNS = (
 
 
 def _normalize(text: str) -> str:
-    return " ".join(text.casefold().split())
+    normalized = unicodedata.normalize("NFC", text)
+    return " ".join(normalized.casefold().split())
 
 
 def _looks_background(text: str) -> bool:
     normalized = _normalize(text)
-    return any(pattern in normalized for pattern in _BACKGROUND_PATTERNS)
+    return any(pattern.search(normalized) for pattern in _BACKGROUND_REGEXES)
 
 
 def _question_requests_background(question: str) -> bool:
     normalized = _normalize(question)
-    return any(pattern in normalized for pattern in _BACKGROUND_REQUEST_PATTERNS)
+    return any(pattern.search(normalized) for pattern in _BACKGROUND_REQUEST_REGEXES)
 
 
 def _shares_key_terms(question: str, candidate_text: str) -> bool:
@@ -97,7 +99,7 @@ def _shares_key_terms(question: str, candidate_text: str) -> bool:
     question_terms = {
         token
         for token in re.findall(r"[\wÀ-ỹ]+", _normalize(question))
-        if len(token) >= 3 and token not in stopwords
+        if len(token) >= 2 and token not in stopwords
     }
     candidate_terms = set(re.findall(r"[\wÀ-ỹ]+", _normalize(candidate_text)))
     return bool(question_terms & candidate_terms)
@@ -159,6 +161,8 @@ def select_relevant_candidates(
     supporting = [item for item in labeled if item.label == CandidateLabel.SUPPORTING]
 
     if query_class in {QueryClass.DIRECT_DEFINITION, QueryClass.DIRECT_RULE} and not direct:
+        if supporting:
+            return sorted(supporting, key=lambda item: item.score, reverse=True)[:final_top_n]
         return []
 
     ordered = sorted(direct, key=lambda item: item.score, reverse=True)

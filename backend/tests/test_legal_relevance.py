@@ -94,16 +94,31 @@ def test_split_lightrag_context_handles_leading_separator():
 def test_short_vietnamese_legal_terms_are_not_dropped():
     candidate = ContextCandidate(
         id="fine",
-        text="Người điều khiển xe máy vi phạm nồng độ cồn bị phạt tiền.",
-        source="Nghị định xử phạt",
+        text="xe máy đi bộ",
+        source="Luật",
         score=0.8,
     )
 
     assert label_candidate(
-        "Xe máy bị phạt bao nhiêu?",
+        "xe đi bộ",
         candidate,
-        QueryClass.DIRECT_RULE,
+        QueryClass.RELATIONAL,
     ) == CandidateLabel.DIRECT
+
+
+def test_fallback_to_supporting_when_no_direct_candidates():
+    candidates = [
+        ContextCandidate(id="supporting", text="Trách nhiệm của cơ quan quản lý đường bộ.", source="Luật", score=0.9),
+    ]
+
+    selected = select_relevant_candidates(
+        question="Hành lang an toàn đường bộ được xác định từ đâu?",
+        candidates=candidates,
+        query_class=QueryClass.DIRECT_DEFINITION,
+        final_top_n=3,
+    )
+
+    assert [item.id for item in selected] == ["supporting"]
 
 
 def test_render_curated_context_numbers_candidates():
