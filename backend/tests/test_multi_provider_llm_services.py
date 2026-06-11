@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock
 import numpy as np
 
 import backend.core.llm_services as llm_services
+from backend.config import NVIDIA_OPENAI_COMPATIBLE_BASE_URL
 
 
 class FakeEmbeddingResponse:
@@ -48,11 +49,11 @@ def test_get_answer_llm_client_uses_answer_key_and_nvidia_base_url(monkeypatch):
 
     monkeypatch.setattr(llm_services.openai, "AsyncOpenAI", DummyClient)
     monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_API_KEY", "answer-key")
-    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
+    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", NVIDIA_OPENAI_COMPATIBLE_BASE_URL)
 
     llm_services.get_answer_llm_client()
 
-    assert created == [{"api_key": "answer-key", "base_url": "https://integrate.api.nvidia.com/v1"}]
+    assert created == [{"api_key": "answer-key", "base_url": NVIDIA_OPENAI_COMPATIBLE_BASE_URL}]
 
 
 def test_indexing_llm_func_disables_thinking(monkeypatch):
@@ -130,7 +131,7 @@ def test_answer_client_factory_memoizes_until_reset(monkeypatch):
 
     monkeypatch.setattr(llm_services.openai, "AsyncOpenAI", DummyClient)
     monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_API_KEY", "answer-key")
-    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
+    monkeypatch.setattr(llm_services.settings, "ANSWER_LLM_BASE_URL", NVIDIA_OPENAI_COMPATIBLE_BASE_URL)
 
     first = llm_services.get_answer_llm_client()
     second = llm_services.get_answer_llm_client()

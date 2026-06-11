@@ -1,7 +1,10 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 import json
+from typing import Optional
+
 from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+NVIDIA_OPENAI_COMPATIBLE_BASE_URL = "https://integrate.api.nvidia.com/v1"
 
 
 class Settings(BaseSettings):
@@ -21,7 +24,7 @@ class Settings(BaseSettings):
     INDEXING_LLM_MODEL: str = "deepseek-v4-flash"
     INDEXING_LLM_THINKING_MODE: str = "disabled"
 
-    ANSWER_LLM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    ANSWER_LLM_BASE_URL: str = NVIDIA_OPENAI_COMPATIBLE_BASE_URL
     ANSWER_LLM_API_KEY: Optional[str] = None
     ANSWER_LLM_MODEL: str = "openai/gpt-oss-120b"
 
