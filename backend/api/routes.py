@@ -39,10 +39,10 @@ async def chat(request: ChatRequest):
                     param=QueryParam(mode="naive"),
                     system_prompt=naive_system_prompt,
                 )
-                hybrid_response = await rag.aquery(
-                    request.message,
-                    param=QueryParam(mode="hybrid"),
-                    system_prompt=hybrid_system_prompt,
+                hybrid_response = await answer_controlled_chat(
+                    rag=rag,
+                    message=request.message,
+                    stream=False,
                 )
                 return ComparisonResponse(
                     naive=ChatResponse(response=naive_response, mode="naive"),
@@ -91,10 +91,10 @@ async def chat(request: ChatRequest):
                 )
                 t2 = asyncio.create_task(
                     stream_wrapper(
-                        rag.aquery(
-                            request.message,
-                            param=QueryParam(mode="hybrid", stream=True),
-                            system_prompt=hybrid_system_prompt,
+                        answer_controlled_chat(
+                            rag=rag,
+                            message=request.message,
+                            stream=True,
                         ),
                         "hybrid",
                     )

@@ -81,9 +81,11 @@ def test_chat_passes_hybrid_legal_prompt_for_streaming_requests(monkeypatch):
 
 def test_chat_passes_mode_specific_legal_prompts_for_comparison_requests(monkeypatch):
     client = make_client()
-    fake_rag = SimpleNamespace(aquery=AsyncMock(side_effect=["Naive answer", "Hybrid answer"]))
+    fake_rag = SimpleNamespace(aquery=AsyncMock(return_value="Naive answer"))
+    controlled = AsyncMock(return_value="Hybrid answer")
 
     monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+    monkeypatch.setattr(routes, "answer_controlled_chat", controlled)
 
     response = client.post(
         "/api/chat",
@@ -99,11 +101,10 @@ def test_chat_passes_mode_specific_legal_prompts_for_comparison_requests(monkeyp
         "naive",
         build_legal_system_prompt("naive"),
     )
-    _assert_legal_query_call(
-        _call_by_mode(fake_rag.aquery, "hybrid"),
-        "Quy định nồng độ cồn thế nào?",
-        "hybrid",
-        build_legal_system_prompt("hybrid"),
+    controlled.assert_awaited_once_with(
+        rag=fake_rag,
+        message="Quy định nồng độ cồn thế nào?",
+        stream=False,
     )
 
 
@@ -119,12 +120,12 @@ def test_chat_passes_mode_specific_legal_prompts_for_streaming_comparison_reques
     async def fake_aquery(query, param=None, system_prompt=None):
         if param.mode == "naive":
             return naive_stream()
-        if param.mode == "hybrid":
-            return hybrid_stream()
-        raise AssertionError(f"Unexpected mode: {param.mode!r}")
+        raise AssertionError(f"Unexpected direct rag mode: {param.mode!r}")
 
+    controlled = AsyncMock(return_value=hybrid_stream())
     fake_rag = SimpleNamespace(aquery=AsyncMock(side_effect=fake_aquery))
     monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+    monkeypatch.setattr(routes, "answer_controlled_chat", controlled)
 
     response = client.post(
         "/api/chat",
@@ -142,11 +143,9 @@ def test_chat_passes_mode_specific_legal_prompts_for_streaming_comparison_reques
         build_legal_system_prompt("naive"),
         stream=True,
     )
-    _assert_legal_query_call(
-        _call_by_mode(fake_rag.aquery, "hybrid"),
-        "Quy định nồng độ cồn thế nào?",
-        "hybrid",
-        build_legal_system_prompt("hybrid"),
+    controlled.assert_awaited_once_with(
+        rag=fake_rag,
+        message="Quy định nồng độ cồn thế nào?",
         stream=True,
     )
 
@@ -172,4 +171,34 @@ def test_single_hybrid_chat_uses_controlled_pipeline(monkeypatch):
         stream=False,
     )
     fake_rag.aquery.assert_not_awaited()
+
+
+def test_comparison_uses_naive_direct_call_and_controlled_hybrid(monkeypatch):
+    client = make_client()
+    fake_rag = SimpleNamespace(aquery=AsyncMock(return_value="Naive answer"))
+    controlled = AsyncMock(return_value="Controlled hybrid answer")
+
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+    monkeypatch.setattr(routes, "answer_controlled_chat", controlled)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Hành lang an toàn đường bộ được xác định từ đâu?", "stream": False, "comparison_mode": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["naive"]["response"] == "Naive answer"
+    assert response.json()["hybrid"]["response"] == "Controlled hybrid answer"
+    _assert_legal_query_call(
+        _call_by_mode(fake_rag.aquery, "naive"),
+        "Hành lang an toàn đường bộ được xác định từ đâu?",
+        "naive",
+        build_legal_system_prompt("naive"),
+    )
+    controlled.assert_awaited_once_with(
+        rag=fake_rag,
+        message="Hành lang an toàn đường bộ được xác định từ đâu?",
+        stream=False,
+    )
+
 
