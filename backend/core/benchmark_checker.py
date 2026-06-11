@@ -38,6 +38,12 @@ def check_required_terms(answer: str, terms: list[str]) -> dict:
     return {"pass": not missing, "missing": missing}
 
 
+def check_expected_answer_points(answer: str, points: list[str]) -> dict:
+    found = _find_matching_terms(answer, points)
+    missing = [point for point in points if point not in found]
+    return {"pass": not missing, "missing": missing}
+
+
 def check_forbidden_paraphrases(answer: str, terms: list[str]) -> dict:
     found = _find_matching_terms(answer, terms)
     return {"pass": not found, "found": found}
@@ -88,18 +94,22 @@ def check_answer(answer: str, benchmark_item: dict) -> dict:
     required_terms = benchmark_item.get("required_terms", [])
     forbidden_paraphrases = benchmark_item.get("forbidden_paraphrases", [])
     expected_sources = benchmark_item.get("expected_sources", [])
+    expected_answer_points = benchmark_item.get("expected_answer_points", [])
 
     required_result = check_required_terms(answer, required_terms)
     forbidden_result = check_forbidden_paraphrases(answer, forbidden_paraphrases)
     expected_sources_result = check_expected_sources(answer, expected_sources)
+    expected_answer_points_result = check_expected_answer_points(answer, expected_answer_points)
 
     return {
         "required_terms": required_result,
         "forbidden_paraphrases": forbidden_result,
         "expected_sources": expected_sources_result,
+        "expected_answer_points": expected_answer_points_result,
         "overall_pass": (
             required_result["pass"]
             and forbidden_result["pass"]
             and expected_sources_result["pass"]
+            and expected_answer_points_result["pass"]
         ),
     }

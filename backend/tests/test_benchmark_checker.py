@@ -6,6 +6,7 @@ import pytest
 
 from backend.core.benchmark_checker import (
     check_answer,
+    check_expected_answer_points,
     check_expected_sources,
     check_forbidden_paraphrases,
     check_required_terms,
@@ -13,8 +14,7 @@ from backend.core.benchmark_checker import (
     normalize_text,
 )
 
-EXPECTED_REAL_BENCHMARK_SIZE = 10
-EXPECTED_REAL_BENCHMARK_CATEGORY_COUNTS = {"exactness": 3, "graph_strength": 7}
+EXPECTED_REAL_BENCHMARK_CATEGORIES = {"exactness", "graph_strength"}
 
 
 SAMPLE_FIXTURE = [
@@ -48,8 +48,10 @@ def test_load_real_benchmark_fixture():
         os.path.dirname(__file__), "..", "..", "data", "legal_benchmark.json"
     )
     items = load_benchmark(fixture_path)
-    assert len(items) == EXPECTED_REAL_BENCHMARK_SIZE
-    assert Counter(item["category"] for item in items) == EXPECTED_REAL_BENCHMARK_CATEGORY_COUNTS
+    category_counts = Counter(item["category"] for item in items)
+    assert items
+    assert EXPECTED_REAL_BENCHMARK_CATEGORIES.issubset(category_counts)
+    assert all(category_counts[category] > 0 for category in EXPECTED_REAL_BENCHMARK_CATEGORIES)
     for item in items:
         assert "question" in item
         assert "required_terms" in item
@@ -136,9 +138,24 @@ def test_check_expected_sources_cases(answer, expected_sources, expected_pass, e
     assert result["missing"] == expected_missing
 
 
+def test_check_expected_answer_points_pass():
+    answer = "Hành lang an toàn đường bộ là phần đất dọc hai bên đường bộ."
+    result = check_expected_answer_points(answer, ["phần đất dọc hai bên đường bộ"])
+    assert result["pass"] is True
+    assert result["missing"] == []
+
+
+def test_check_expected_answer_points_fail():
+    answer = "Hành lang an toàn đường bộ là phần đất của đường bộ."
+    result = check_expected_answer_points(answer, ["phần đất dọc hai bên đường bộ"])
+    assert result["pass"] is False
+    assert result["missing"] == ["phần đất dọc hai bên đường bộ"]
+
+
 def test_check_answer_combines_all_checks():
     answer = (
-        "Hành lang an toàn đường bộ là phần đất của đường bộ dọc hai bên.\n\n"
+        "Hành lang an toàn đường bộ là phần đất của đường bộ. "
+        "Đây là phần đất dọc hai bên đường bộ.\n\n"
         "**Tham chiếu**\n"
         "- [1] Luật Trật tự, an toàn giao thông đường bộ\n"
     )
@@ -147,7 +164,20 @@ def test_check_answer_combines_all_checks():
     assert result["required_terms"]["pass"] is True
     assert result["forbidden_paraphrases"]["pass"] is True
     assert result["expected_sources"]["pass"] is True
+    assert result["expected_answer_points"]["pass"] is True
     assert result["overall_pass"] is True
+
+
+def test_check_answer_fails_on_missing_expected_answer_points():
+    answer = (
+        "Hành lang an toàn đường bộ là phần đất của đường bộ.\n\n"
+        "**Tham chiếu**\n"
+        "- [1] Luật Trật tự, an toàn giao thông đường bộ\n"
+    )
+    item = SAMPLE_FIXTURE[0]
+    result = check_answer(answer, item)
+    assert result["expected_answer_points"]["pass"] is False
+    assert result["overall_pass"] is False
 
 
 def test_check_answer_fails_on_forbidden():

@@ -30,7 +30,6 @@ if str(REPO_ROOT) not in sys.path:
 from backend.core.benchmark_checker import check_answer, load_benchmark
 
 DEFAULT_FIXTURE_PATH = REPO_ROOT / "data" / "legal_benchmark.json"
-SUPPORTED_CATEGORIES = ("exactness", "graph_strength")
 REQUEST_TIMEOUT_SECONDS = 120.0
 PREVIEW_LENGTH = 280
 
@@ -48,9 +47,8 @@ def parse_args() -> argparse.Namespace:
     )
     selection_group.add_argument(
         "--category",
-        choices=SUPPORTED_CATEGORIES,
         default=None,
-        help="Run only benchmark items in the selected category",
+        help="Run only benchmark items in the selected fixture-defined category",
     )
     parser.add_argument(
         "--fixture",
@@ -89,6 +87,16 @@ def _extract_comparison_answer(payload: dict[str, Any], mode: str) -> str:
     return response
 
 
+def _available_categories(items: list[dict[str, Any]]) -> list[str]:
+    return sorted(
+        {
+            category
+            for item in items
+            if isinstance((category := item.get("category")), str) and category
+        }
+    )
+
+
 def _filter_items(items: list[dict[str, Any]], index: int | None, category: str | None) -> list[dict[str, Any]]:
     if index is not None:
         if index < 0 or index >= len(items):
@@ -96,7 +104,11 @@ def _filter_items(items: list[dict[str, Any]], index: int | None, category: str 
         return [items[index]]
 
     if category is not None:
-        return [item for item in items if item.get("category") == category]
+        selected = [item for item in items if item.get("category") == category]
+        if not selected:
+            available = ", ".join(_available_categories(items)) or "none"
+            raise ValueError(f"unknown category {category!r}; available categories: {available}")
+        return selected
 
     return items
 
@@ -121,6 +133,7 @@ def _print_check(mode: str, result: dict[str, Any]) -> bool:
     required_terms = check["required_terms"]
     forbidden_paraphrases = check["forbidden_paraphrases"]
     expected_sources = check["expected_sources"]
+    expected_answer_points = check["expected_answer_points"]
     passed = bool(check["overall_pass"])
     status = "PASS" if passed else "FAIL"
     print(f"  [{mode}] {status}")
@@ -131,6 +144,8 @@ def _print_check(mode: str, result: dict[str, Any]) -> bool:
         print(f"    forbidden paraphrases found: {forbidden_paraphrases['found']}")
     if not expected_sources["pass"]:
         print(f"    missing expected sources: {expected_sources['missing']}")
+    if not expected_answer_points["pass"]:
+        print(f"    missing expected answer points: {expected_answer_points['missing']}")
 
     print(f"    answer preview: {_preview(result['answer'])}")
     return passed
@@ -151,7 +166,7 @@ def main() -> int:
 
     try:
         selected_items = _filter_items(items, args.index, args.category)
-    except IndexError as exc:
+    except (IndexError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 1
 
