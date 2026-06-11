@@ -1,0 +1,209 @@
+"""Legal relevance filtering for retrieved LightRAG context."""
+
+import re
+from dataclasses import dataclass
+from enum import StrEnum
+
+from backend.core.query_router import QueryClass
+
+
+class CandidateLabel(StrEnum):
+    DIRECT = "direct"
+    SUPPORTING = "supporting"
+    BACKGROUND = "background"
+    NOISE = "noise"
+
+
+@dataclass(frozen=True)
+class ContextCandidate:
+    id: str
+    text: str
+    source: str = ""
+    score: float = 0.0
+    label: CandidateLabel | None = None
+
+
+_BACKGROUND_PATTERNS = (
+    "hiến pháp",
+    "phạm vi điều chỉnh",
+    "chính sách phát triển",
+    "chính sách chung",
+    "căn cứ ban hành",
+    "quản lý nhà nước",
+    "điều 1",
+    "điều 4",
+)
+
+_BACKGROUND_REQUEST_PATTERNS = (
+    "phạm vi điều chỉnh",
+    "chính sách",
+    "hiến pháp",
+    "căn cứ ban hành",
+    "điều 1",
+    "điều 4",
+)
+
+_DIRECT_DEFINITION_PATTERNS = (
+    "là ",
+    "được hiểu là",
+    "có nghĩa là",
+    "được xác định",
+    "tính từ",
+    "nhằm",
+    "để bảo đảm",
+)
+
+_SUPPORTING_PATTERNS = (
+    "trách nhiệm",
+    "thẩm quyền",
+    "điều kiện",
+    "ngoại lệ",
+    "chế tài",
+    "xử phạt",
+    "nghĩa vụ",
+    "quản lý",
+    "bảo vệ",
+)
+
+
+def _normalize(text: str) -> str:
+    return " ".join(text.casefold().split())
+
+
+def _looks_background(text: str) -> bool:
+    normalized = _normalize(text)
+    return any(pattern in normalized for pattern in _BACKGROUND_PATTERNS)
+
+
+def _question_requests_background(question: str) -> bool:
+    normalized = _normalize(question)
+    return any(pattern in normalized for pattern in _BACKGROUND_REQUEST_PATTERNS)
+
+
+def _shares_key_terms(question: str, candidate_text: str) -> bool:
+    stopwords = {
+        "những",
+        "được",
+        "như",
+        "thế",
+        "nào",
+        "bao",
+        "nhiêu",
+        "của",
+        "và",
+        "cho",
+        "người",
+    }
+    question_terms = {
+        token
+        for token in re.findall(r"[\wÀ-ỹ]+", _normalize(question))
+        if len(token) >= 3 and token not in stopwords
+    }
+    candidate_terms = set(re.findall(r"[\wÀ-ỹ]+", _normalize(candidate_text)))
+    return bool(question_terms & candidate_terms)
+
+
+def label_candidate(
+    question: str,
+    candidate: ContextCandidate,
+    query_class: QueryClass,
+) -> CandidateLabel:
+    text = _normalize(f"{candidate.source} {candidate.text}")
+
+    if (
+        _looks_background(text)
+        and query_class in {QueryClass.DIRECT_DEFINITION, QueryClass.DIRECT_RULE}
+        and not _question_requests_background(question)
+    ):
+        return CandidateLabel.BACKGROUND
+
+    if not _shares_key_terms(question, candidate.text):
+        return CandidateLabel.NOISE
+
+    if query_class == QueryClass.DIRECT_DEFINITION:
+        if any(pattern in text for pattern in _DIRECT_DEFINITION_PATTERNS):
+            return CandidateLabel.DIRECT
+        return CandidateLabel.SUPPORTING
+
+    if query_class == QueryClass.DIRECT_RULE:
+        if any(pattern in text for pattern in _SUPPORTING_PATTERNS) or "phạt" in text:
+            return CandidateLabel.DIRECT
+        return CandidateLabel.SUPPORTING
+
+    if any(pattern in text for pattern in _SUPPORTING_PATTERNS):
+        return CandidateLabel.SUPPORTING
+    return CandidateLabel.DIRECT
+
+
+def select_relevant_candidates(
+    question: str,
+    candidates: list[ContextCandidate],
+    query_class: QueryClass,
+    final_top_n: int,
+) -> list[ContextCandidate]:
+    labeled: list[ContextCandidate] = []
+    for candidate in candidates:
+        label = label_candidate(question, candidate, query_class)
+        if label in {CandidateLabel.DIRECT, CandidateLabel.SUPPORTING}:
+            labeled.append(
+                ContextCandidate(
+                    id=candidate.id,
+                    text=candidate.text,
+                    source=candidate.source,
+                    score=candidate.score,
+                    label=label,
+                )
+            )
+
+    direct = [item for item in labeled if item.label == CandidateLabel.DIRECT]
+    supporting = [item for item in labeled if item.label == CandidateLabel.SUPPORTING]
+
+    if query_class in {QueryClass.DIRECT_DEFINITION, QueryClass.DIRECT_RULE} and not direct:
+        return []
+
+    ordered = sorted(direct, key=lambda item: item.score, reverse=True)
+    if query_class not in {QueryClass.DIRECT_DEFINITION, QueryClass.DIRECT_RULE}:
+        ordered.extend(sorted(supporting, key=lambda item: item.score, reverse=True))
+    else:
+        remaining_slots = max(final_top_n - len(ordered), 0)
+        ordered.extend(sorted(supporting, key=lambda item: item.score, reverse=True)[:remaining_slots])
+
+    return ordered[:final_top_n]
+
+
+def split_lightrag_context(context: str) -> list[ContextCandidate]:
+    stripped = context.strip()
+    if not stripped:
+        return []
+
+    separator_re = r"(?:^|\n)-{3,}[^\n]*-{3,}(?:\n|$)"
+    parts = [
+        part.strip()
+        for part in re.split(separator_re, stripped)
+        if part.strip()
+    ]
+    if len(parts) <= 1:
+        parts = [part.strip() for part in re.split(r"\n\s*\n", stripped) if part.strip()]
+
+    return [
+        ContextCandidate(id=f"ctx-{index}", text=part, source=_infer_source(part))
+        for index, part in enumerate(parts, start=1)
+    ]
+
+
+def _infer_source(text: str) -> str:
+    first_line = text.strip().splitlines()[0] if text.strip() else ""
+    if "luật" in first_line.casefold() or "điều" in first_line.casefold():
+        return first_line[:160]
+    return ""
+
+
+def render_curated_context(candidates: list[ContextCandidate]) -> str:
+    if not candidates:
+        return "Không tìm thấy căn cứ trực tiếp đủ liên quan trong ngữ cảnh truy xuất."
+
+    sections = []
+    for index, candidate in enumerate(candidates, start=1):
+        source = f" ({candidate.source})" if candidate.source else ""
+        sections.append(f"[{index}]{source}\n{candidate.text.strip()}")
+    return "\n\n".join(sections)
