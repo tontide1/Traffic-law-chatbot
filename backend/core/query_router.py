@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import StrEnum
+import unicodedata
 
 
 class QueryClass(StrEnum):
@@ -32,6 +33,9 @@ _DIRECT_DEFINITION_SIGNALS = (
     "được xác định từ đâu",
     "nhằm mục đích gì",
     "có nghĩa là gì",
+    "định nghĩa",
+    "bao gồm những gì",
+    "thế nào là",
 )
 
 _RELATIONAL_SIGNALS = (
@@ -39,10 +43,10 @@ _RELATIONAL_SIGNALS = (
     "căn cứ nào",
     "so sánh",
     "khác nhau",
-    "trong trường hợp",
     "ngoại lệ",
     "hậu quả pháp lý",
     "trách nhiệm của",
+    "phân biệt",
 )
 
 _DIRECT_RULE_SIGNALS = (
@@ -60,7 +64,8 @@ _DIRECT_RULE_SIGNALS = (
 
 
 def _normalize_query(query: str) -> str:
-    return " ".join(query.casefold().split())
+    normalized = unicodedata.normalize("NFC", query)
+    return " ".join(normalized.casefold().split())
 
 
 def _contains_any(text: str, signals: tuple[str, ...]) -> bool:
