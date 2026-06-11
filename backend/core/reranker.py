@@ -41,7 +41,8 @@ class BGEReranker:
                 ) from exc
 
             use_fp16 = self.config.device != "cpu"
-            self._model = FlagReranker(self.config.model, use_fp16=use_fp16)
+            devices = None if self.config.device == "auto" else self.config.device
+            self._model = FlagReranker(self.config.model, use_fp16=use_fp16, devices=devices)
         return self._model
 
     def rerank(self, question: str, candidates: list[ContextCandidate]) -> list[ContextCandidate]:
