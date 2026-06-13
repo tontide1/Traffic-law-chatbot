@@ -4,13 +4,22 @@ from collections.abc import AsyncIterator
 
 from lightrag import QueryParam
 
+from backend.core.citation_utils import (
+    has_semantic_drift,
+    render_direct_definition_answer,
+)
 from backend.core.legal_prompts import build_curated_answer_system_prompt
 from backend.core.legal_relevance import (
     render_curated_context,
     select_relevant_candidates,
     split_lightrag_context,
 )
-from backend.core.query_router import RetrievalPolicy, classify_query, retrieval_policy_for
+from backend.core.query_router import (
+    QueryClass,
+    RetrievalPolicy,
+    classify_query,
+    retrieval_policy_for,
+)
 from backend.core.reranker import Reranker, build_reranker, rerank_candidates
 
 
@@ -62,8 +71,22 @@ async def answer_controlled_chat(
     )
     curated_context = render_curated_context(selected)
 
-    return await rag.aquery(
+    direct_definition_answer = render_direct_definition_answer(selected)
+    if query_class == QueryClass.DIRECT_DEFINITION and direct_definition_answer is not None:
+        return direct_definition_answer
+
+    answer = await rag.aquery(
         _build_answer_query(message, curated_context),
         param=QueryParam(mode="bypass", stream=stream),
         system_prompt=build_curated_answer_system_prompt(),
     )
+
+    if (
+        not stream
+        and isinstance(answer, str)
+        and has_semantic_drift(answer, curated_context)
+        and direct_definition_answer is not None
+    ):
+        return direct_definition_answer
+
+    return answer

@@ -83,3 +83,33 @@ def test_curated_answer_prompt_has_no_lightrag_context_placeholders():
     assert "{content_data}" not in template
     assert "{response_type}" not in template
     assert "ngữ cảnh pháp lý đã được chọn lọc" in template.lower()
+
+
+def test_curated_answer_prompt_rejects_definition_paraphrase_markers():
+    from backend.core.legal_prompts import build_curated_answer_system_prompt
+
+    template = build_curated_answer_system_prompt().lower()
+
+    assert "theo định nghĩa trên" in template
+    assert "nói cách khác" in template
+    assert "không viết" in template or "không dùng" in template
+
+
+def test_curated_answer_prompt_requires_inline_citations():
+    from backend.core.legal_prompts import build_curated_answer_system_prompt
+    template = build_curated_answer_system_prompt().lower()
+
+    assert "trích dẫn" in template or "citation" in template
+    assert "inline" in template or "ngay cuối câu" in template
+    assert "cuối câu" in template
+    assert "trả lời trực tiếp vào câu hỏi trước" in template
+
+
+def test_curated_answer_prompt_avoids_headings_for_simple_answers():
+    from backend.core.legal_prompts import build_curated_answer_system_prompt
+    template = build_curated_answer_system_prompt().lower()
+
+    assert "không dùng" in template or "tránh dùng" in template
+    assert "căn cứ chính" in template
+    assert "liên kết pháp lý liên quan" in template
+    assert "câu hỏi đơn giản" in template or "một căn cứ" in template
