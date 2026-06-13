@@ -102,6 +102,7 @@ def test_curated_answer_prompt_requires_inline_citations():
     assert "trích dẫn" in template or "citation" in template
     assert "inline" in template or "ngay cuối câu" in template
     assert "cuối câu" in template
+    assert "trả lời trực tiếp vào câu hỏi trước" in template
 
 
 def test_curated_answer_prompt_avoids_headings_for_simple_answers():

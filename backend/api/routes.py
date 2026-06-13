@@ -3,6 +3,7 @@ from backend.api.schemas import ChatRequest, ChatResponse, ComparisonResponse, U
 from fastapi.responses import StreamingResponse
 import json
 import asyncio
+import logging
 from lightrag import QueryParam
 from backend.core.rag_engine import RAGEngine
 from backend.core.document_parser import parse_pdf_to_markdown
@@ -15,6 +16,7 @@ from backend.core.controlled_chat import answer_controlled_chat
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 SUPPORTED_INDEXING_PROVIDERS = {"deepseek", "google_studio"}
 
@@ -132,7 +134,7 @@ async def chat(request: ChatRequest):
                     yield f"data: {json.dumps({'type': 'chunk', 'mode': 'hybrid', 'content': str(generator)})}\n\n"
                 yield f"data: {json.dumps({'type': 'done'})}\n\n"
         except Exception as e:
-            print(f"STREAM ERROR (single): {str(e)}")
+            logger.error("STREAM ERROR (single) while streaming response", exc_info=True)
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
     return StreamingResponse(
