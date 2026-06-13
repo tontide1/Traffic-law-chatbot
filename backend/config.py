@@ -60,8 +60,6 @@ class Settings(BaseSettings):
     RERANKER_MODEL: str = "BAAI/bge-reranker-v2-m3"
     RERANKER_MAX_LENGTH: int = 1024
     RERANKER_DEVICE: str = "auto"
-    RERANKER_TOP_N_DIRECT: int = 3
-    RERANKER_TOP_N_RELATIONAL: int = 6
 
     @field_validator("RAG_ENTITY_TYPES", mode="before")
     @classmethod
