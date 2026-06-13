@@ -202,3 +202,52 @@ def test_comparison_uses_naive_direct_call_and_controlled_hybrid(monkeypatch):
     )
 
 
+def test_single_hybrid_chat_returns_answer_first_inline_citation(monkeypatch):
+    client = make_client()
+    fake_rag = SimpleNamespace(aquery=AsyncMock(return_value="unused"))
+    controlled = AsyncMock(
+        return_value=(
+            "Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ. "
+            "(Điều 2 khoản 5, Luật Đường bộ 35/2024/QH15)."
+        )
+    )
+
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+    monkeypatch.setattr(routes, "answer_controlled_chat", controlled)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Hành lang an toàn đường bộ là gì?", "stream": False, "comparison_mode": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["response"].startswith("Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ")
+    assert "(Điều 2 khoản 5, Luật Đường bộ 35/2024/QH15)." in response.json()["response"]
+    assert "Căn cứ chính" not in response.json()["response"]
+
+
+def test_comparison_hybrid_chat_returns_answer_first_inline_citation(monkeypatch):
+    client = make_client()
+    fake_rag = SimpleNamespace(aquery=AsyncMock(return_value="Naive answer"))
+    controlled = AsyncMock(
+        return_value=(
+            "Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ. "
+            "(Điều 2 khoản 5, Luật Đường bộ 35/2024/QH15)."
+        )
+    )
+
+    monkeypatch.setattr(routes.RAGEngine, "get_query_instance", lambda: fake_rag)
+    monkeypatch.setattr(routes, "answer_controlled_chat", controlled)
+
+    response = client.post(
+        "/api/chat",
+        json={"message": "Hành lang an toàn đường bộ là gì?", "stream": False, "comparison_mode": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["hybrid"]["response"].startswith("Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ")
+    assert "(Điều 2 khoản 5, Luật Đường bộ 35/2024/QH15)." in response.json()["hybrid"]["response"]
+    assert "Căn cứ chính" not in response.json()["hybrid"]["response"]
+
+
+
