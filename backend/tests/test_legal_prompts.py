@@ -83,3 +83,13 @@ def test_curated_answer_prompt_has_no_lightrag_context_placeholders():
     assert "{content_data}" not in template
     assert "{response_type}" not in template
     assert "ngữ cảnh pháp lý đã được chọn lọc" in template.lower()
+
+
+def test_curated_answer_prompt_rejects_definition_paraphrase_markers():
+    from backend.core.legal_prompts import build_curated_answer_system_prompt
+
+    template = build_curated_answer_system_prompt().lower()
+
+    assert "theo định nghĩa trên" in template
+    assert "nói cách khác" in template
+    assert "không viết" in template or "không dùng" in template

@@ -71,7 +71,10 @@ _LIGHTRAG_INTERNAL_KWARGS = {"hashing_kv", "mode", "json_mode", "enable_cot"}
 
 def _filter_kwargs(kwargs: dict) -> dict:
     """Remove LightRAG-internal keys and the 'model' override from kwargs."""
-    return {k: v for k, v in kwargs.items() if k not in _LIGHTRAG_INTERNAL_KWARGS and k != "model"}
+    return {
+        k: v for k, v in kwargs.items()
+        if k not in _LIGHTRAG_INTERNAL_KWARGS and k != "model" and not k.startswith("_")
+    }
 
 
 def _base_messages(prompt: str, system_prompt: str = None, history: List[dict] = None):

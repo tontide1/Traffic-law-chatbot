@@ -132,6 +132,7 @@ async def chat(request: ChatRequest):
                     yield f"data: {json.dumps({'type': 'chunk', 'mode': 'hybrid', 'content': str(generator)})}\n\n"
                 yield f"data: {json.dumps({'type': 'done'})}\n\n"
         except Exception as e:
+            print(f"STREAM ERROR (single): {str(e)}")
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
     return StreamingResponse(

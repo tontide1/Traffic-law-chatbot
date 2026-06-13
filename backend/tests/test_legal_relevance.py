@@ -91,6 +91,34 @@ def test_split_lightrag_context_handles_leading_separator():
     assert "Điều 2" in candidates[0].text
 
 
+def test_split_lightrag_context_unwraps_json_content_payload():
+    context = (
+        '```json\n'
+        '{"reference_id": "1", "content": "Điều 2 khoản 5: Hành lang an toàn đường bộ là dải đất."}'
+        '\n```'
+    )
+
+    candidates = split_lightrag_context(context)
+
+    assert len(candidates) == 1
+    assert candidates[0].text == "Điều 2 khoản 5: Hành lang an toàn đường bộ là dải đất."
+    assert "reference_id" not in candidates[0].text
+
+
+def test_split_lightrag_context_unwraps_consecutive_json_content_payloads():
+    context = (
+        '{"reference_id": "1", "content": "Điều 1. Phạm vi điều chỉnh."} '
+        '{"reference_id": "2", "content": "Điều 2 khoản 5: Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ."}'
+    )
+
+    candidates = split_lightrag_context(context)
+
+    assert len(candidates) == 2
+    assert candidates[0].text == "Điều 1. Phạm vi điều chỉnh."
+    assert candidates[1].text == "Điều 2 khoản 5: Hành lang an toàn đường bộ là dải đất dọc hai bên đất của đường bộ."
+    assert all("reference_id" not in candidate.text for candidate in candidates)
+
+
 def test_short_vietnamese_legal_terms_are_not_dropped():
     candidate = ContextCandidate(
         id="fine",
