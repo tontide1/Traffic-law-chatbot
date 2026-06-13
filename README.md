@@ -93,6 +93,7 @@ Indexed legal relationships can be explored through the integrated LightRAG grap
 | Indexing LLM | DeepSeek-V4-Flash or Google Studio-compatible provider |
 | Answer LLM | `openai/gpt-oss-120b` via NVIDIA's OpenAI-compatible endpoint |
 | Embeddings | `AITeamVN/Vietnamese_Embedding_v2` served locally through vLLM |
+| Reranker | `BAAI/bge-reranker-v2-m3` via `FlagEmbedding` |
 | Deployment | Docker Compose |
 
 ## Getting Started
