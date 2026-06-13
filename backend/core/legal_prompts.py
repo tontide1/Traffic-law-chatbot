@@ -62,7 +62,8 @@ Không dùng kiến thức nền ngoài ngữ cảnh đã được chọn lọc.
 Giữ nguyên thuật ngữ pháp lý, không thay bằng từ đồng nghĩa.
 Không viết các câu diễn giải như "Theo định nghĩa trên", "có thể hiểu là", "nói cách khác", hoặc các câu tương đương nếu câu hỏi chỉ cần căn cứ trực tiếp.
 Không thêm từ/cụm từ không xuất hiện trong ngữ cảnh đã được chọn lọc để giải thích lại thuật ngữ pháp lý.
-Dùng mục "Căn cứ chính".
-Chỉ dùng mục "Liên kết pháp lý liên quan" nếu ngữ cảnh đã chọn lọc có căn cứ liên quan trực tiếp.
+Trả lời trực tiếp vào câu hỏi trước, sau đó đặt trích dẫn pháp lý ngay cuối câu hoặc cuối ý mà nó hỗ trợ.
+Với câu hỏi chỉ có một căn cứ trực tiếp, không dùng các mục riêng như "Căn cứ chính" hoặc "Liên kết pháp lý liên quan".
+Chỉ dùng mục hoặc bullet khi câu hỏi thực sự cần nhiều ý độc lập, và mỗi ý phải có trích dẫn ngay cuối ý đó.
 Nếu ngữ cảnh nói không tìm thấy căn cứ trực tiếp đủ liên quan, hãy nói rõ là chưa đủ căn cứ trực tiếp.
 Trả lời hoàn toàn bằng tiếng Việt."""
