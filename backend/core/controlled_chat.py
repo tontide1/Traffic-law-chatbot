@@ -117,13 +117,43 @@ def _extract_direct_definition(candidates: list[ContextCandidate]) -> ExtractedD
     return None
 
 
+def _clean_definition_text(text: str) -> str:
+    cleaned = text.strip().strip("“”\"' ").rstrip(".")
+    return cleaned
+
+
+def _clean_citation_source(source: str) -> str:
+    cleaned = " ".join(source.strip().rstrip(":").split())
+    cleaned = re.sub(r"^[,;:\s]+", "", cleaned)
+
+    parts = [p.strip() for p in cleaned.split(",") if p.strip()]
+    if len(parts) >= 2:
+        p0_lower = parts[0].lower()
+        p1_lower = parts[1].lower()
+        law_keywords = ("luật", "nghị định", "thông tư", "hiến pháp", "pháp lệnh", "quyết định", "nghị quyết")
+        article_keywords = ("điều", "khoản", "điểm", "chương", "mục")
+
+        if any(kw in p0_lower for kw in law_keywords) and any(kw in p1_lower for kw in article_keywords):
+            parts[0], parts[1] = parts[1], parts[0]
+            cleaned = ", ".join(parts)
+
+    return cleaned
+
+
+def _render_inline_citation_answer(extracted: ExtractedDefinition) -> str:
+    definition = _clean_definition_text(extracted.text)
+    citation = _clean_citation_source(extracted.source)
+
+    if citation:
+        return f"{definition}. ({citation})."
+    return f"{definition}."
+
+
 def _render_direct_definition_answer(candidates: list[ContextCandidate]) -> str | None:
     extracted = _extract_direct_definition(candidates)
     if extracted is None:
         return None
-
-    source = f"\n\n{extracted.source}:" if extracted.source else ""
-    return f"Căn cứ chính{source}\n\n“{extracted.text}”"
+    return _render_inline_citation_answer(extracted)
 
 
 def _has_semantic_drift(answer: str, source_context: str) -> bool:
@@ -162,9 +192,8 @@ async def answer_controlled_chat(
     curated_context = render_curated_context(selected)
 
     direct_definition_answer = _render_direct_definition_answer(selected)
-    if query_class == QueryClass.DIRECT_DEFINITION:
-        if direct_definition_answer is not None:
-            return direct_definition_answer
+    if query_class == QueryClass.DIRECT_DEFINITION and direct_definition_answer is not None:
+        return direct_definition_answer
 
     answer = await rag.aquery(
         _build_answer_query(message, curated_context),
