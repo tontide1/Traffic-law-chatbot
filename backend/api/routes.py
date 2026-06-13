@@ -11,6 +11,8 @@ import shutil
 import os
 from backend.config import settings
 from backend.core.indexing_provider_store import IndexingProviderStore
+from backend.core.controlled_chat import answer_controlled_chat
+
 
 router = APIRouter()
 
@@ -37,20 +39,20 @@ async def chat(request: ChatRequest):
                     param=QueryParam(mode="naive"),
                     system_prompt=naive_system_prompt,
                 )
-                hybrid_response = await rag.aquery(
-                    request.message,
-                    param=QueryParam(mode="hybrid"),
-                    system_prompt=hybrid_system_prompt,
+                hybrid_response = await answer_controlled_chat(
+                    rag=rag,
+                    message=request.message,
+                    stream=False,
                 )
                 return ComparisonResponse(
                     naive=ChatResponse(response=naive_response, mode="naive"),
                     hybrid=ChatResponse(response=hybrid_response, mode="hybrid")
                 )
             else:
-                response = await rag.aquery(
-                    request.message,
-                    param=QueryParam(mode="hybrid"),
-                    system_prompt=hybrid_system_prompt,
+                response = await answer_controlled_chat(
+                    rag=rag,
+                    message=request.message,
+                    stream=False,
                 )
                 return ChatResponse(response=response, mode="hybrid")
         except Exception as e:
@@ -89,34 +91,39 @@ async def chat(request: ChatRequest):
                 )
                 t2 = asyncio.create_task(
                     stream_wrapper(
-                        rag.aquery(
-                            request.message,
-                            param=QueryParam(mode="hybrid", stream=True),
-                            system_prompt=hybrid_system_prompt,
+                        answer_controlled_chat(
+                            rag=rag,
+                            message=request.message,
+                            stream=True,
                         ),
                         "hybrid",
                     )
                 )
                 pending_tasks.update([t1, t2])
                 
-                while pending_tasks:
-                    # Wait for items in queue or for tasks to finish
-                    while not queue.empty():
-                        yield await queue.get()
+                try:
+                    while pending_tasks:
+                        # Wait for items in queue or for tasks to finish
+                        while not queue.empty():
+                            yield await queue.get()
+                        
+                        done, pending_tasks = await asyncio.wait(pending_tasks, timeout=0.1, return_when=asyncio.FIRST_COMPLETED)
+                        
+                        # Yield any new items added during wait
+                        while not queue.empty():
+                            yield await queue.get()
                     
-                    done, pending_tasks = await asyncio.wait(pending_tasks, timeout=0.1, return_when=asyncio.FIRST_COMPLETED)
-                    
-                    # Yield any new items added during wait
-                    while not queue.empty():
-                        yield await queue.get()
-                
-                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                finally:
+                    for task in (t1, t2):
+                        if not task.done():
+                            task.cancel()
             else:
                 # Standard single stream
-                generator = await rag.aquery(
-                    request.message,
-                    param=QueryParam(mode="hybrid", stream=True),
-                    system_prompt=hybrid_system_prompt,
+                generator = await answer_controlled_chat(
+                    rag=rag,
+                    message=request.message,
+                    stream=True,
                 )
                 if hasattr(generator, '__aiter__'):
                     async for chunk in generator:

@@ -1,6 +1,6 @@
 import pytest
 
-from scripts.run_regression_check import _available_categories, _filter_items
+from scripts.run_regression_check import _available_categories, _filter_items, build_payload
 
 
 def test_available_categories_are_derived_from_items():
@@ -29,3 +29,14 @@ def test_filter_items_rejects_unknown_category_with_available_categories():
 
     with pytest.raises(ValueError, match="available categories: exactness, graph_strength"):
         _filter_items(items, index=None, category="missing")
+
+
+def test_build_payload_defaults_to_stream_false_and_comparison_mode():
+    payload = build_payload("Câu hỏi")
+
+    assert payload == {
+        "message": "Câu hỏi",
+        "stream": False,
+        "comparison_mode": True,
+    }
+

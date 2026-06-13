@@ -48,6 +48,7 @@ docling>=2.0.0
 transformers>=4.37.0
 torch>=2.0.0
 sentence-transformers>=2.3.0
+FlagEmbedding>=1.2.11
 
 # Test Support
 pytest>=8.2.0
