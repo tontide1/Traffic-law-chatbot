@@ -166,6 +166,7 @@ async def answer_llm_func(
     effective_history = history or history_messages
     messages = _base_messages(prompt, system_prompt=system_prompt, history=effective_history)
     request_kwargs = _filter_kwargs(kwargs)
+    request_kwargs["temperature"] = 0.0
 
     response = await client.chat.completions.create(
         model=settings.ANSWER_LLM_MODEL,
