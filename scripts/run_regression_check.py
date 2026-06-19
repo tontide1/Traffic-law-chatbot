@@ -234,6 +234,18 @@ def main() -> int:
                         passed_checks += 1
                     else:
                         failed_checks += 1
+                
+                if args.export:
+                    record = {
+                        "id": item.get("id"),
+                        "question": question,
+                        "ground_truth": item.get("ground_truth", ""),
+                        "naive_response": results["naive"]["answer"],
+                        "hybrid_response": results["hybrid"]["answer"],
+                        "naive_deterministic_pass": results["naive"]["check"]["overall_pass"],
+                        "hybrid_deterministic_pass": results["hybrid"]["check"]["overall_pass"]
+                    }
+                    export_to_jsonl(args.export, record)
     except httpx.HTTPError as exc:
         print(f"ERROR: request to {chat_url} failed: {exc}")
         return 1

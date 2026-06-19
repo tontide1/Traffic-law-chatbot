@@ -27,3 +27,54 @@ def test_export_to_jsonl():
     finally:
         if tmp_path.exists():
             os.remove(tmp_path)
+
+from unittest.mock import patch
+import sys
+from scripts.run_regression_check import main
+
+@patch("scripts.run_regression_check.export_to_jsonl")
+@patch("scripts.run_regression_check.httpx.Client")
+@patch("scripts.run_regression_check.load_benchmark")
+@patch("scripts.run_regression_check.check_answer")
+def test_integration_calls_export(mock_check, mock_load, mock_client_class, mock_export):
+    mock_load.return_value = [{
+        "id": "123",
+        "question": "test q",
+        "ground_truth": "truth",
+        "category": "test"
+    }]
+    
+    mock_client = mock_client_class.return_value.__enter__.return_value
+    mock_client.post.return_value.json.return_value = {
+        "naive": {"response": "naive_ans"},
+        "hybrid": {"response": "hybrid_ans"}
+    }
+    
+    mock_check.return_value = {
+        "overall_pass": True,
+        "required_terms": {"pass": True, "missing": []},
+        "forbidden_paraphrases": {"pass": True, "found": []},
+        "expected_sources": {"pass": True, "missing": []},
+        "expected_answer_points": {"pass": True, "missing": []},
+        "forbidden_sources": {"pass": True, "found": []}
+    }
+    
+    with patch.object(sys, "argv", ["run_regression_check.py", "--export", "dummy.jsonl"]):
+        try:
+            main()
+        except SystemExit as e:
+            assert e.code == 0
+            
+    mock_export.assert_called_once()
+    args, kwargs = mock_export.call_args
+    assert args[0] == Path("dummy.jsonl")
+    
+    record = args[1]
+    assert record["id"] == "123"
+    assert record["question"] == "test q"
+    assert record["ground_truth"] == "truth"
+    assert record["naive_response"] == "naive_ans"
+    assert record["hybrid_response"] == "hybrid_ans"
+    assert record["naive_deterministic_pass"] is True
+    assert record["hybrid_deterministic_pass"] is True
+
