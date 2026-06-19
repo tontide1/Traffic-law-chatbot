@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import json
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -34,7 +35,7 @@ REQUEST_TIMEOUT_SECONDS = 120.0
 PREVIEW_LENGTH = 280
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the legal benchmark against the live /api/chat route",
     )
@@ -61,7 +62,19 @@ def parse_args() -> argparse.Namespace:
         default="http://localhost:8000",
         help="Base URL of the FastAPI backend",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--export",
+        type=Path,
+        default=None,
+        help="Path to export the predictions and results as JSONL",
+    )
+    return parser.parse_args(args)
+
+
+def export_to_jsonl(filepath: Path, record: dict[str, Any]) -> None:
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def _normalize_api_url(api_url: str) -> str:
@@ -221,6 +234,18 @@ def main() -> int:
                         passed_checks += 1
                     else:
                         failed_checks += 1
+                
+                if args.export:
+                    record = {
+                        "id": item.get("id"),
+                        "question": question,
+                        "ground_truth": item.get("ground_truth", ""),
+                        "naive_response": results["naive"]["answer"],
+                        "hybrid_response": results["hybrid"]["answer"],
+                        "naive_deterministic_pass": results["naive"]["check"]["overall_pass"],
+                        "hybrid_deterministic_pass": results["hybrid"]["check"]["overall_pass"]
+                    }
+                    export_to_jsonl(args.export, record)
     except httpx.HTTPError as exc:
         print(f"ERROR: request to {chat_url} failed: {exc}")
         return 1
