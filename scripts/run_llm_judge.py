@@ -12,10 +12,12 @@ REQUIRED_FIELDS = ("question", "ground_truth", "naive_response", "hybrid_respons
 _openai_client: Optional[OpenAI] = None
 
 class EvaluationResult(BaseModel):
-    accuracy_score: int = Field(..., ge=1, le=5, description="Điểm chính xác từ 1-5")
-    comprehensiveness_score: int = Field(..., ge=1, le=5, description="Điểm đầy đủ từ 1-5")
-    connectivity_score: int = Field(..., ge=1, le=5, description="Điểm liên kết từ 1-5")
-    reasoning: str = Field(..., description="Lý do chấm điểm (tiếng Việt)")
+    accuracy_score: int = Field(..., ge=1, le=5, description="Tính chính xác pháp lý (không hallucination). Từ 1-5.")
+    comprehensiveness_score: int = Field(..., ge=1, le=5, description="Tính toàn diện (đủ ngoại lệ, phạt bổ sung). Từ 1-5.")
+    multi_hop_score: int = Field(..., ge=1, le=5, description="Khả năng suy luận đa bước, liên kết điều khoản sửa đổi. Từ 1-5.")
+    relevance_score: int = Field(..., ge=1, le=5, description="Tính trọng tâm, đi thẳng vào vấn đề, không lan man. Từ 1-5.")
+    citation_score: int = Field(..., ge=1, le=5, description="Trích dẫn rõ ràng, chính xác Điều/Khoản/Nghị định. Từ 1-5.")
+    reasoning: str = Field(..., description="Lý do phân tích chi tiết (chỉ ra phương pháp nào lan man hơn, phương pháp nào trích dẫn tốt hơn). Bằng tiếng Việt.")
 
 def get_openai_client() -> OpenAI:
     global _openai_client
@@ -38,10 +40,12 @@ Câu hỏi: {question}
 Ground Truth: {ground_truth}
 Câu trả lời: {answer}
 
-Tiêu chí:
-1. Accuracy (1-5): Tính chính xác.
-2. Comprehensiveness (1-5): Tính đầy đủ các trường hợp.
-3. Connectivity (1-5): Khả năng liên kết các điều luật.
+Tiêu chí chấm điểm (1-5):
+1. Accuracy: Tính chính xác pháp lý. Câu trả lời có đúng luật không? Tuyệt đối không được hallucinate.
+2. Comprehensiveness: Tính toàn diện. Có nêu đủ các trường hợp ngoại lệ, hình phạt bổ sung (ví dụ: tước bằng lái) hay không?
+3. Multi-hop Reasoning: Suy luận đa bước. Có khả năng nhận biết văn bản sửa đổi/bổ sung, liên kết từ luật này sang luật khác không?
+4. Relevance: Tính trọng tâm. Trả lời trực tiếp vào vấn đề, không lan man, không lôi kéo các thông tin thừa thãi không cần thiết.
+5. Source Citation: Độ tin cậy trích dẫn. Trích dẫn rõ ràng và chính xác số/tên điều khoản, nghị định áp dụng.
 """
     try:
         client = client or get_openai_client()

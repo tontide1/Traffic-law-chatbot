@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "commit": "20570d13b842376397a4f65d8932a2a5987e85a3",
-    "indexed_at": "2026-06-19T09:28:46Z",
+    "commit": "03dca4635978f96a2f06789411a22f03a9da8dec",
+    "indexed_at": "2026-06-19T17:16:36Z",
     "project": "home-tontide1-coding-traffic-law-assistant-main",
     "nodes": 897,
     "edges": 1803,
     "original_size": 4521984,
-    "compressed_size": 632103,
+    "compressed_size": 632102,
     "compression_level": 3
 }
