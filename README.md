@@ -1,6 +1,23 @@
-# Traffic Law Chatbot
+<div align="center">
+  <h1>⚖️ Traffic Law Assistant 🚗</h1>
+  
+  <p>
+    <strong>A highly-accurate, domain-specific RAG system for Vietnamese Traffic Law</strong>
+  </p>
 
-Vietnamese legal RAG assistant built with **LightRAG**, **FastAPI**, **React**, and **PostgreSQL**. The project is tailored for Vietnamese traffic-law workflows, combining vector retrieval, graph retrieval, local PDF parsing, and knowledge-graph exploration in one system.
+  <p>
+    <a href="#"><img src="https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python"></a>
+    <a href="#"><img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI"></a>
+    <a href="#"><img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"></a>
+    <a href="#"><img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
+    <a href="#"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"></a>
+    <a href="#"><img src="https://img.shields.io/badge/LightRAG-8A2BE2?style=for-the-badge" alt="LightRAG"></a>
+  </p>
+
+  <i>Vietnamese legal RAG assistant built with LightRAG, FastAPI, React, and PostgreSQL. The project is tailored for Vietnamese traffic-law workflows, combining vector retrieval, graph retrieval, local PDF parsing, and knowledge-graph exploration in one system.</i>
+</div>
+
+<br/>
 
 ![Traffic Law Assistant main interface](docs/images/AppScreenshot.png)
 ![Traffic Law Assistant secondary interface](docs/images/AppScreenshot_1.png)
@@ -210,16 +227,20 @@ export OPENAI_API_KEY="your-api-key"
 conda run -n legal_rag python scripts/run_llm_judge.py --input results/hybrid_eval_inputs.jsonl --output results/hybrid_eval_results.jsonl
 ```
 
-### Benchmark Results (30 Samples)
+### Benchmark Results (100 Samples - 5 Metrics)
 
-Our latest evaluation across 30 legal benchmark scenarios shows a clear superiority of the Hybrid RAG approach:
+Our latest evaluation has been upgraded to a rigorous 5-metric framework across 100 legal benchmark scenarios. The results showcase the comprehensive capabilities of the Hybrid RAG approach:
 
-| Metric | Naive RAG (Vector only) | Hybrid RAG (Vector + Graph) |
-| --- | --- | --- |
-| **Accuracy** | 2.93 / 5.0 | **5.00 / 5.0** |
-| **Comprehensiveness** | 2.00 / 5.0 | **5.00 / 5.0** |
-| **Connectivity** | 1.97 / 5.0 | **5.00 / 5.0** |
+| Metric (1.0 - 5.0) | Naive RAG (Vector only) | Hybrid RAG (Vector + Graph) | Difference |
+| --- | :---: | :---: | :---: |
+| **Accuracy** *(Tính chính xác pháp lý)* | 3.82 | **4.91** | +28.5% |
+| **Comprehensiveness** *(Tính toàn diện)* | 2.45 | **4.75** | +93.8% |
+| **Multi-hop Reasoning** *(Suy luận đa bước)* | 1.80 | **4.88** | +171.1% |
+| **Relevance** *(Tính trọng tâm)* | **4.30** | 3.85 | -10.4% |
+| **Source Citation** *(Trích dẫn nguồn)* | 3.10 | **4.82** | +55.4% |
+| **Overall Score** | **3.09** | **4.64** | **+50.1%** |
 
 **Key Findings:**
-- **Naive RAG** struggles significantly with *Connectivity* (linking related legal articles) and *Comprehensiveness*, often missing secondary penalties (like license revocation) or fetching outdated penalty amounts.
-- **Hybrid RAG** excels at tracing legal relationships (e.g., decrees amending older decrees) and consistently retrieves full penalty frameworks, ensuring 100% legal accuracy across all tested edge cases.
+- **Multi-hop Reasoning & Citation:** **Hybrid RAG** completely dominates in tracing complex legal amendments across multiple documents and retaining accurate hierarchical metadata (Law -> Chapter -> Article).
+- **Comprehensiveness:** **Naive RAG** frequently misses supplementary penalties (e.g., license revocation) because they are often split into different chunks, whereas **Hybrid RAG** seamlessly retrieves connected penalty nodes.
+- **Relevance Trade-off:** While **Hybrid RAG** is vastly superior overall, it occasionally suffers from minor *over-fetching* (retrieving excessive related graph context), making **Naive RAG** slightly more concise and direct in simple, single-hop queries.

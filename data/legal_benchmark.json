@@ -1026,5 +1026,1025 @@
     "expected_answer_points": [
       "khung giờ bật đèn chiếu sáng theo luật mới"
     ]
+  },
+  {
+    "id": "telecom-line-vertical-clearance",
+    "question": "Giới hạn theo phương thẳng đứng của đường dây thông tin, viễn thông đi phía trên đường bộ được quy định tối thiểu là bao nhiêu mét?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "không nhỏ hơn 5,5 mét",
+      "tính từ điểm thấp nhất của đường dây",
+      "tới điểm cao nhất trên mặt đường"
+    ],
+    "forbidden_paraphrases": [
+      "4,5 mét"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "chiều cao tối thiểu 5,5 mét"
+    ]
+  },
+  {
+    "id": "rescue-tunnel-usage",
+    "question": "Hầm cứu nạn gắn liền với hầm đường bộ được sử dụng vào mục đích gì và có được dùng cho phương tiện giao thông lưu thông không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "phục vụ việc thoát hiểm, cứu hộ, cứu nạn",
+      "công tác bảo trì hầm",
+      "Không sử dụng hầm cứu nạn phục vụ mục đích lưu thông"
+    ],
+    "forbidden_paraphrases": [
+      "được dùng khi tắc đường"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "mục đích thoát hiểm cứu nạn",
+      "cấm dùng để lưu thông"
+    ]
+  },
+  {
+    "id": "consigned-goods-declaration",
+    "question": "Khi gửi hàng hóa theo xe ô tô khách mà người gửi không đi cùng (hàng ký gửi), tờ khai gửi hàng được lập mấy bản và cần xuất trình gì khi nhận?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "lập thành 02 bản",
+      "mỗi bên giữ một bản",
+      "xuất trình giấy tờ tuỳ thân khi nhận hàng"
+    ],
+    "forbidden_paraphrases": [
+      "không cần tờ khai"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "2 bản tờ khai",
+      "xuất trình giấy tờ tùy thân"
+    ]
+  },
+  {
+    "id": "mobile-phone-prohibition",
+    "question": "Hành vi dùng tay cầm và sử dụng điện thoại khi đang điều khiển phương tiện tham gia giao thông trên đường bộ bị quy định như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Các hành vi bị nghiêm cấm",
+      "Dùng tay cầm và sử dụng điện thoại hoặc thiết bị điện tử khác"
+    ],
+    "forbidden_paraphrases": [
+      "được dùng nếu gọi rảnh tay"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "thuộc nhóm hành vi bị nghiêm cấm"
+    ]
+  },
+  {
+    "id": "slow-vehicle-lane",
+    "question": "Trên đường có nhiều làn đường, xe thô sơ phải di chuyển trên làn đường nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "xe thô sơ phải đi trên làn đường bên phải trong cùng"
+    ],
+    "forbidden_paraphrases": [
+      "làn giữa",
+      "bất kỳ làn nào"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "làn bên phải trong cùng"
+    ]
+  },
+  {
+    "id": "parking-distance-from-curb",
+    "question": "Khi dừng, đỗ xe trên đường phố, bánh xe gần nhất không được cách lề đường, vỉa hè quá bao nhiêu mét?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "bánh xe gần nhất không được cách xa lề đường, vỉa hè quá 0,25 mét"
+    ],
+    "forbidden_paraphrases": [
+      "0,5 mét"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "khoảng cách tối đa 0,25 mét"
+    ]
+  },
+  {
+    "id": "opening-car-door-rules",
+    "question": "Người lái xe chỉ được mở cửa xe trong trường hợp nào và phải đảm bảo điều kiện gì trước khi mở cửa?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Chỉ được mở cửa xe khi xe đã dừng, đỗ",
+      "quan sát phía trước, phía sau và bên phía mở cửa xe",
+      "thấy an toàn mới được mở"
+    ],
+    "forbidden_paraphrases": [
+      "mở khi xe chạy chậm"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "xe phải dừng/đỗ",
+      "quan sát an toàn"
+    ]
+  },
+  {
+    "id": "parking-lot-passenger-pickup",
+    "question": "Đơn vị kinh doanh dịch vụ bãi đỗ xe có được cho phép xe kinh doanh vận tải đón, trả khách tại bãi đỗ xe không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "Không được để các chủ phương tiện kinh doanh vận tải sử dụng bãi đỗ xe để đón, trả khách",
+      "hoặc xếp, dỡ hàng hóa"
+    ],
+    "forbidden_paraphrases": [
+      "được đón khách nếu bãi vắng"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm đón trả khách tại bãi đỗ xe"
+    ]
+  },
+  {
+    "id": "animal-on-road-rules",
+    "question": "Khi gặp vật nuôi đi trên đường hoặc chăn thả ở ven đường, người điều khiển phương tiện giao thông phải làm gì?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "phải quan sát, giảm tốc độ hoặc dừng lại để bảo đảm an toàn"
+    ],
+    "forbidden_paraphrases": [
+      "bấm còi liên tục"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "quan sát, giảm tốc độ, dừng lại"
+    ]
+  },
+  {
+    "id": "expressway-toll-payment-method",
+    "question": "Việc thanh toán tiền sử dụng đường bộ trên đường cao tốc bắt buộc phải thực hiện theo hình thức nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "phải thực hiện theo hình thức điện tử không dừng"
+    ],
+    "forbidden_paraphrases": [
+      "tiền mặt",
+      "thủ công"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "thanh toán điện tử không dừng"
+    ]
+  },
+  {
+    "id": "seatbelt-requirement-all-seats",
+    "question": "Quy định về việc thắt dây đai an toàn đối với người lái xe và người ngồi trên xe ô tô được quy định như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "phải thắt dây đai an toàn tại những chỗ có trang bị dây đai an toàn"
+    ],
+    "forbidden_paraphrases": [
+      "chỉ hàng ghế trước"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "bắt buộc thắt dây ở mọi vị trí có trang bị"
+    ]
+  },
+  {
+    "id": "traffic-signal-priority-order",
+    "question": "Thứ tự ưu tiên chấp hành hệ thống báo hiệu đường bộ từ cao nhất xuống thấp nhất là gì?",
+    "category": "graph_strength",
+    "query_class": "relational",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Hiệu lệnh của người điều khiển giao thông",
+      "Tín hiệu đèn",
+      "Biển báo hiệu",
+      "Vạch kẻ đường",
+      "Cọc tiêu, tường bảo vệ"
+    ],
+    "forbidden_paraphrases": [
+      "đèn đỏ là cao nhất"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "liệt kê thứ tự ưu tiên báo hiệu"
+    ]
+  },
+  {
+    "id": "flashing-yellow-light-rules",
+    "question": "Khi tín hiệu đèn màu vàng nhấp nháy, người điều khiển phương tiện phải xử lý như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "được đi nhưng phải quan sát",
+      "giảm tốc độ hoặc dừng lại nhường đường cho người đi bộ"
+    ],
+    "forbidden_paraphrases": [
+      "phải dừng lại chờ đèn xanh"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "được đi nhưng phải chú ý nhường đường"
+    ]
+  },
+  {
+    "id": "conflicting-traffic-signs",
+    "question": "Khi có sự mâu thuẫn giữa biển báo hiệu cố định và biển báo hiệu tạm thời, người tham gia giao thông phải tuân theo biển báo nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "phải chấp hành hiệu lệnh của biển báo hiệu tạm thời"
+    ],
+    "forbidden_paraphrases": [
+      "biển cố định"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "tuân theo biển tạm thời"
+    ]
+  },
+  {
+    "id": "slow-speed-vehicle-lane",
+    "question": "Phương tiện di chuyển với tốc độ thấp hơn khi tham gia giao thông trên đường bộ phải đi về phía nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "phải đi về bên phải theo chiều đi của mình"
+    ],
+    "forbidden_paraphrases": [
+      "đi làn giữa",
+      "đi bên trái"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "xe đi chậm đi về bên phải"
+    ]
+  },
+  {
+    "id": "turning-yielding-rules",
+    "question": "Khi chuyển hướng xe, người lái xe phải nhường đường cho những đối tượng nào?",
+    "category": "graph_strength",
+    "query_class": "relational",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "nhường đường cho người đi bộ",
+      "xe thô sơ",
+      "xe đi ngược chiều"
+    ],
+    "forbidden_paraphrases": [],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "nhường người đi bộ, xe ngược chiều, xe thô sơ"
+    ]
+  },
+  {
+    "id": "uphill-downhill-yielding",
+    "question": "Khi tránh nhau trên đường hẹp, xe lên dốc và xe xuống dốc phải nhường đường như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Xe xuống dốc phải nhường đường cho xe lên dốc"
+    ],
+    "forbidden_paraphrases": [
+      "xe lên dốc nhường"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "xe xuống dốc phải nhường"
+    ]
+  },
+  {
+    "id": "high-beam-low-beam-switching",
+    "question": "Khi gặp xe đi ngược chiều vào ban đêm, người lái xe phải sử dụng đèn chiếu sáng như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "tắt đèn chiếu xa",
+      "bật đèn chiếu gần",
+      "trừ trường hợp dải phân cách có khả năng chống chói"
+    ],
+    "forbidden_paraphrases": [
+      "giữ nguyên đèn chiếu xa"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "chuyển từ pha sang cốt"
+    ]
+  },
+  {
+    "id": "ferry-boarding-alighting-order",
+    "question": "Thứ tự lên xuống bến phà giữa xe cơ giới và người đi bộ được quy định như thế nào?",
+    "category": "graph_strength",
+    "query_class": "relational",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "xe cơ giới, xe máy chuyên dùng xuống trước, người đi bộ xuống sau",
+      "người đi bộ lên trước, các phương tiện giao thông đường bộ lên sau"
+    ],
+    "forbidden_paraphrases": [
+      "người đi bộ xuống trước"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "quy định lên xuống phà"
+    ]
+  },
+  {
+    "id": "road-database-exclusions",
+    "question": "Cơ sở dữ liệu về hoạt động vận tải bằng xe ô tô (thuộc Cơ sở dữ liệu đường bộ) không bao gồm những thông tin nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "trừ cơ sở dữ liệu về hành trình",
+      "hình ảnh người lái xe",
+      "quản lý thời gian điều khiển phương tiện"
+    ],
+    "forbidden_paraphrases": [],
+    "forbidden_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "expected_answer_points": [
+      "các thông tin bị loại trừ khỏi CSDL đường bộ"
+    ]
+  },
+  {
+    "id": "bridge-protection-land",
+    "question": "Phần đất để bảo vệ, bảo trì mố, trụ cầu được xác định như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "xác định từ mép ngoài trở ra của móng",
+      "các hạng mục công trình mố, trụ",
+      "mép ngoài của kết cấu cầu"
+    ],
+    "forbidden_paraphrases": [],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "ranh giới đất bảo vệ mố, trụ cầu"
+    ]
+  },
+  {
+    "id": "corridor-tree-pruning",
+    "question": "Việc trồng, chăm sóc và khai thác cây trong hành lang an toàn đường bộ phải tuân thủ điều kiện gì liên quan đến báo hiệu đường bộ?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "Cắt xén khi cây che lấp báo hiệu đường bộ",
+      "che khuất tầm nhìn"
+    ],
+    "forbidden_paraphrases": [],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "quy định tỉa cành che biển báo"
+    ]
+  },
+  {
+    "id": "different-speeds-on-dual-carriageway",
+    "question": "Tốc độ giới hạn trên đường đôi có bắt buộc phải giống nhau ở cả hai chiều đường không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "Đối với đường đôi, giá trị giới hạn tốc độ cho từng chiều đường có thể khác nhau"
+    ],
+    "forbidden_paraphrases": [
+      "bắt buộc giống nhau"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cho phép khác tốc độ trên đường đôi"
+    ]
+  },
+  {
+    "id": "passenger-stop-construction",
+    "question": "Đối với các tuyến đường ngoài đô thị có hoạt động vận tải hành khách bằng xe ô tô (trừ đường cao tốc), việc xây dựng điểm dừng đón trả khách được quy định ra sao?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "phải xây dựng điểm dừng xe để đón, trả khách",
+      "phải được xây dựng ngoài phạm vi đường bộ"
+    ],
+    "forbidden_paraphrases": [
+      "không cần xây"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "bắt buộc xây điểm dừng đỗ ngoài phạm vi đường bộ"
+    ]
+  },
+  {
+    "id": "electric-vehicle-charging-parking",
+    "question": "Bến xe, trạm dừng nghỉ phải đáp ứng yêu cầu gì về hạ tầng cho phương tiện sử dụng năng lượng điện?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "phải có hệ thống sạc điện",
+      "Ưu tiên bố trí hệ thống sạc điện tại bãi đỗ xe"
+    ],
+    "forbidden_paraphrases": [],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "bắt buộc có trạm sạc điện"
+    ]
+  },
+  {
+    "id": "ambulance-transport-requirements",
+    "question": "Dịch vụ vận tải người bệnh bằng xe cứu thương phải đáp ứng những yêu cầu thiết bị nào trên xe?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "thiết bị y tế chuyên dùng",
+      "có dấu hiệu nhận diện",
+      "lắp thiết bị giám sát hành trình",
+      "thiết bị ghi nhận hình ảnh người lái xe"
+    ],
+    "forbidden_paraphrases": [
+      "xe 16 chỗ bình thường"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "trang bị bắt buộc trên xe cứu thương"
+    ]
+  },
+  {
+    "id": "multimodal-transport-contract",
+    "question": "Vận tải đa phương thức liên quan đến đường bộ phải thực hiện bằng tối thiểu bao nhiêu phương thức vận tải?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "ít nhất 02 phương thức vận tải",
+      "trong đó có phương thức vận tải bằng đường bộ"
+    ],
+    "forbidden_paraphrases": [
+      "1 phương thức"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "ít nhất 2 phương thức"
+    ]
+  },
+  {
+    "id": "car-rental-liability",
+    "question": "Người thuê phương tiện giao thông để tự lái có được sử dụng phương tiện đó để kinh doanh vận tải hành khách thu tiền không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "không được sử dụng phương tiện đi thuê để vận tải hành khách, hàng hoá có thu tiền"
+    ],
+    "forbidden_paraphrases": [
+      "được phép dùng để chạy taxi"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "nghiêm cấm dùng xe tự lái để chạy dịch vụ"
+    ]
+  },
+  {
+    "id": "road-safety-audit-cost",
+    "question": "Chi phí thẩm tra, thẩm định an toàn giao thông đối với đường bộ xây dựng mới được tính vào nguồn nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "tính vào tổng mức đầu tư",
+      "dự toán xây dựng công trình"
+    ],
+    "forbidden_paraphrases": [
+      "nguồn thu phí"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "tính vào tổng mức đầu tư dự án"
+    ]
+  },
+  {
+    "id": "flying-objects-road-clearance",
+    "question": "Việc điều khiển vật thể bay, tàu bay không người lái trong phạm vi khổ giới hạn đường bộ bị nghiêm cấm trong trường hợp nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "gây cản trở hoặc nguy cơ mất an toàn cho người, phương tiện",
+      "trừ tàu bay không người lái, phương tiện bay siêu nhẹ được cấp phép bay"
+    ],
+    "forbidden_paraphrases": [
+      "luôn luôn cấm"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm bay flycam gây mất an toàn trừ khi có phép"
+    ]
+  },
+  {
+    "id": "giving-vehicle-unqualified-person",
+    "question": "Hành vi giao xe cơ giới, xe máy chuyên dùng cho người không đủ điều kiện điều khiển tham gia giao thông có bị Luật quy định nghiêm cấm không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Các hành vi bị nghiêm cấm",
+      "Giao xe cơ giới",
+      "cho người không đủ điều kiện theo quy định của pháp luật"
+    ],
+    "forbidden_paraphrases": [
+      "không bị cấm nếu có bằng lái nước ngoài"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "là hành vi bị nghiêm cấm tuyệt đối"
+    ]
+  },
+  {
+    "id": "car-modification-prohibition",
+    "question": "Pháp luật có cho phép cải tạo xe ô tô loại khác thành xe ô tô chở người không?",
+    "category": "graph_strength",
+    "query_class": "relational",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "nghiêm cấm",
+      "Cải tạo xe ô tô loại khác thành xe ô tô chở người",
+      "trừ cải tạo thành xe ô tô chở người phục vụ mục đích quốc phòng, an ninh"
+    ],
+    "forbidden_paraphrases": [
+      "được phép nếu xin phép cơ quan đăng kiểm"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm cải tạo thành xe chở người, trừ quốc phòng an ninh"
+    ]
+  },
+  {
+    "id": "green-light-yielding-pedestrians",
+    "question": "Khi tín hiệu đèn giao thông màu xanh, người điều khiển phương tiện có bắt buộc phải nhường đường cho người đi bộ đang đi ở lòng đường không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "phải giảm tốc độ hoặc dừng lại nhường đường cho người đi bộ",
+      "xe lăn của người khuyết tật đang đi ở lòng đường"
+    ],
+    "forbidden_paraphrases": [
+      "không cần nhường",
+      "bóp còi đuổi đi"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "vẫn phải giảm tốc độ/dừng lại nhường đường"
+    ]
+  },
+  {
+    "id": "overtaking-conditions",
+    "question": "Xe xin vượt chỉ được phép vượt khi đảm bảo những điều kiện phía trước như thế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "không có chướng ngại vật phía trước",
+      "không có xe chạy ngược chiều",
+      "xe chạy trước không có tín hiệu vượt xe khác",
+      "đã có tín hiệu rẽ phải và tránh về bên phải"
+    ],
+    "forbidden_paraphrases": [
+      "chỉ cần xi nhan là vượt"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "liệt kê các điều kiện bắt buộc trước khi vượt"
+    ]
+  },
+  {
+    "id": "tunnel-overtaking-prohibition",
+    "question": "Người điều khiển phương tiện có được phép vượt xe trong hầm đường bộ không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Không được vượt xe trong trường hợp sau đây",
+      "Trong hầm đường bộ"
+    ],
+    "forbidden_paraphrases": [
+      "được vượt nếu có nhiều làn"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm tuyệt đối vượt trong hầm"
+    ]
+  },
+  {
+    "id": "under-bridge-parking",
+    "question": "Người lái xe có được phép dừng xe, đỗ xe dưới gầm cầu vượt không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Không được dừng xe, đỗ xe",
+      "Gầm cầu vượt",
+      "trừ những nơi cho phép dừng xe, đỗ xe"
+    ],
+    "forbidden_paraphrases": [
+      "được dừng đỗ thoải mái nếu tránh nắng"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm dừng đỗ gầm cầu vượt trừ nơi cho phép"
+    ]
+  },
+  {
+    "id": "traffic-light-placement-rule",
+    "question": "Mặt đèn tín hiệu giao thông phải được lắp đặt quay về hướng nào so với người tham gia giao thông?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "Mặt đèn quay về hướng đối diện chiều đi",
+      "đặt ở vị trí để người tham gia giao thông đường bộ dễ quan sát"
+    ],
+    "forbidden_paraphrases": [
+      "cùng chiều đi"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "quay về hướng đối diện chiều đi"
+    ]
+  },
+  {
+    "id": "road-marking-principles",
+    "question": "Vạch kẻ đường có bắt buộc phải bố trí đi kèm với biển báo hiệu hoặc đèn tín hiệu giao thông không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "có thể bố trí độc lập",
+      "có thể kết hợp với các biển báo hiệu",
+      "đèn tín hiệu giao thông"
+    ],
+    "forbidden_paraphrases": [
+      "luôn luôn phải đi kèm"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "có thể độc lập hoặc kết hợp"
+    ]
+  },
+  {
+    "id": "emergency-escape-ramp-purpose",
+    "question": "Đường cứu nạn tại các đoạn đường đèo dốc được thiết kế nhằm mục đích gì?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "xe mất kiểm soát khi xuống dốc",
+      "rời khỏi đường chính đi vào",
+      "giảm tốc độ và bảo đảm dừng lại"
+    ],
+    "forbidden_paraphrases": [
+      "dùng để quay đầu"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "dành cho xe mất kiểm soát phanh"
+    ]
+  },
+  {
+    "id": "anti-glare-screen-purpose",
+    "question": "Công trình chống chói trên dải phân cách giữa có tác dụng gì?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "giảm bớt ánh sáng đèn của phương tiện lưu thông ngược chiều",
+      "tới mắt người điều khiển phương tiện"
+    ],
+    "forbidden_paraphrases": [
+      "trang trí đường"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "chống ánh sáng chói từ xe ngược chiều"
+    ]
+  },
+  {
+    "id": "vehicle-distance-factors",
+    "question": "Khoảng cách an toàn giữa các xe tham gia giao thông phụ thuộc vào những yếu tố thực tế nào?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "tốc độ khai thác của tuyến đường",
+      "thời tiết",
+      "mật độ phương tiện",
+      "điều kiện giao thông thực tế khác"
+    ],
+    "forbidden_paraphrases": [
+      "chỉ phụ thuộc tốc độ"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "các yếu tố ảnh hưởng khoảng cách xe"
+    ]
+  },
+  {
+    "id": "road-bearing-capacity-definition",
+    "question": "Tải trọng của đường bộ được định nghĩa như thế nào trong Luật Đường bộ?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "khả năng chịu tải khai thác của đường bộ",
+      "để bảo đảm khai thác an toàn",
+      "tuổi thọ công trình đường bộ"
+    ],
+    "forbidden_paraphrases": [
+      "khối lượng xe tải"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "định nghĩa tải trọng đường bộ"
+    ]
+  },
+  {
+    "id": "parking-lot-contact-posting",
+    "question": "Đơn vị kinh doanh dịch vụ bãi đỗ xe phải niêm yết công khai những thông tin gì để người dân khiếu nại khi cần thiết?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "Niêm yết công khai nội quy",
+      "giá dịch vụ tại bãi đỗ xe",
+      "tên và số điện thoại cơ quan quản lý nhà nước có thẩm quyền"
+    ],
+    "forbidden_paraphrases": [
+      "chỉ niêm yết giá"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "phải niêm yết giá, nội quy và SĐT cơ quan quản lý"
+    ]
+  },
+  {
+    "id": "cargo-agency-service-limits",
+    "question": "Dịch vụ đại lý vận tải hàng hóa không được thực hiện những công đoạn nào trong quá trình vận tải?",
+    "category": "graph_strength",
+    "query_class": "relational",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "trừ công đoạn trực tiếp điều hành phương tiện",
+      "người lái xe",
+      "hoặc quyết định giá cước vận tải"
+    ],
+    "forbidden_paraphrases": [
+      "được làm tất cả mọi việc"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "đại lý không điều hành xe và không quyết định giá cước"
+    ]
+  },
+  {
+    "id": "towing-vehicle-commercial-use",
+    "question": "Tổ chức kinh doanh dịch vụ cứu hộ giao thông có được sử dụng xe cứu hộ để chở hàng hóa thu tiền (kinh doanh vận tải hàng hóa) không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "Không được sử dụng xe cứu hộ để kinh doanh vận tải hàng hoá bằng xe ô tô"
+    ],
+    "forbidden_paraphrases": [
+      "được dùng chở hàng lúc rảnh rỗi"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm dùng xe cứu hộ để kinh doanh chở hàng"
+    ]
+  },
+  {
+    "id": "road-safety-audit-new-project",
+    "question": "Đối với dự án đường bộ mới, việc thẩm định an toàn giao thông được thực hiện trong những giai đoạn nào?",
+    "category": "graph_strength",
+    "query_class": "relational",
+    "expected_sources": [
+      "Luật Đường bộ"
+    ],
+    "required_terms": [
+      "giai đoạn lập dự án đầu tư",
+      "thiết kế triển khai sau thiết kế cơ sở",
+      "trước khi đưa công trình đường bộ vào khai thác",
+      "trong quá trình khai thác công trình đường bộ"
+    ],
+    "forbidden_paraphrases": [
+      "chỉ thẩm định khi xảy ra tai nạn"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "giai đoạn thiết kế, thi công và khai thác"
+    ]
+  },
+  {
+    "id": "traffic-warden-rear-signal",
+    "question": "Khi người điều khiển giao thông giơ tay phải về phía trước, các xe ở phía sau người đó phải làm gì?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "phía sau và bên phải người điều khiển giao thông phải dừng lại"
+    ],
+    "forbidden_paraphrases": [
+      "được đi thẳng"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "xe phía sau phải dừng lại"
+    ]
+  },
+  {
+    "id": "road-racing-organizing-ban",
+    "question": "Việc tụ tập cổ vũ đua xe trái phép có vi phạm pháp luật không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Đua xe",
+      "tổ chức đua xe",
+      "xúi giục, giúp sức",
+      "cổ vũ đua xe trái phép",
+      "bị nghiêm cấm"
+    ],
+    "forbidden_paraphrases": [
+      "đứng xem thì không sao"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cổ vũ đua xe cũng là hành vi bị nghiêm cấm"
+    ]
+  },
+  {
+    "id": "accident-scene-fleeing",
+    "question": "Hành vi lợi dụng tai nạn giao thông để hành hung, đe dọa người khác có bị pháp luật cấm không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "lợi dụng việc xảy ra tai nạn giao thông để hành hung, đe dọa",
+      "xúi giục, gây sức ép",
+      "làm mất trật tự, cản trở việc xử lý"
+    ],
+    "forbidden_paraphrases": [
+      "được phép nếu bức xúc"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "hành hung khi tai nạn là bị nghiêm cấm"
+    ]
+  },
+  {
+    "id": "fake-license-plate-usage",
+    "question": "Sử dụng biển số xe không do cơ quan nhà nước có thẩm quyền cấp, hoặc bẻ cong, che lấp biển số xe có vi phạm luật giao thông không?",
+    "category": "exactness",
+    "query_class": "direct_definition",
+    "expected_sources": [
+      "Luật Trật tự, an toàn giao thông đường bộ"
+    ],
+    "required_terms": [
+      "Sản xuất, sử dụng, mua, bán trái phép biển số xe",
+      "không do cơ quan nhà nước có thẩm quyền cấp",
+      "bẻ cong, che lấp biển số xe",
+      "làm thay đổi chữ, số, màu sắc"
+    ],
+    "forbidden_paraphrases": [
+      "có thể che đi để tránh camera"
+    ],
+    "forbidden_sources": [],
+    "expected_answer_points": [
+      "cấm che lấp, dùng biển số giả"
+    ]
   }
 ]
