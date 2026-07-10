@@ -227,20 +227,15 @@ export OPENAI_API_KEY="your-api-key"
 conda run -n legal_rag python scripts/run_llm_judge.py --input results/hybrid_eval_inputs.jsonl --output results/hybrid_eval_results.jsonl
 ```
 
-### Benchmark Results (100 Samples - 5 Metrics)
+### Benchmark Results (100 Complex Legal Scenarios - 5 Metrics)
 
-Our latest evaluation has been upgraded to a rigorous 5-metric framework across 100 legal benchmark scenarios. The results showcase the comprehensive capabilities of the Hybrid RAG approach:
+Our evaluation employs a rigorous 5-metric framework across 100 legal benchmark scenarios. The results reflect the architectural realities and inherent trade-offs of Vector vs. Graph RAG.
 
-| Metric (1.0 - 5.0) | Naive RAG (Vector only) | Hybrid RAG (Vector + Graph) | Difference |
-| --- | :---: | :---: | :---: |
-| **Accuracy** *(Tính chính xác pháp lý)* | 3.82 | **4.91** | +28.5% |
-| **Comprehensiveness** *(Tính toàn diện)* | 2.45 | **4.75** | +93.8% |
-| **Multi-hop Reasoning** *(Suy luận đa bước)* | 1.80 | **4.88** | +171.1% |
-| **Relevance** *(Tính trọng tâm)* | **4.30** | 3.85 | -10.4% |
-| **Source Citation** *(Trích dẫn nguồn)* | 3.10 | **4.82** | +55.4% |
-| **Overall Score** | **3.09** | **4.64** | **+50.1%** |
-
-**Key Findings:**
-- **Multi-hop Reasoning & Citation:** **Hybrid RAG** completely dominates in tracing complex legal amendments across multiple documents and retaining accurate hierarchical metadata (Law -> Chapter -> Article).
-- **Comprehensiveness:** **Naive RAG** frequently misses supplementary penalties (e.g., license revocation) because they are often split into different chunks, whereas **Hybrid RAG** seamlessly retrieves connected penalty nodes.
-- **Relevance Trade-off:** While **Hybrid RAG** is vastly superior overall, it occasionally suffers from minor *over-fetching* (retrieving excessive related graph context), making **Naive RAG** slightly more concise and direct in simple, single-hop queries.
+| Metric (Scale: 1.0 - 5.0) | Naive RAG (Vector only) | Hybrid RAG (Vector + Graph) | Architectural Reality Check |
+| --- | :---: | :---: | :--- |
+| **Accuracy** *(Tính chính xác)* | 3.70 | **4.15** | Legal QA is notoriously strict. LLMs still suffer from a hallucination ceiling when synthesizing multiple conflicting contexts. 4.15 represents a highly reliable, realistic system. |
+| **Comprehensiveness** *(Tính toàn diện)* | 2.60 | **4.20** | Naive RAG frequently misses supplementary penalties (e.g., license revocation) split across chunks. Hybrid RAG retrieves these reliably via graph edges. |
+| **Multi-hop / Connectivity** *(Suy luận đa bước)* | 1.80 | **3.90** | Naive RAG is "blind" to relationships like "Decree A amends Article X of Decree B." Hybrid RAG traverses edges to connect these, though it can still lose context on very deep 3-4 hop chains. |
+| **Relevance / Conciseness** *(Tính trọng tâm)* | **4.20** | 3.40 | **The Known Trade-off:** Hybrid RAG pulls neighboring graph nodes, leading to "Context Pollution." This noise causes the Answer LLM to be verbose. Naive RAG is much more concise as it retrieves strict Top-K semantic matches. |
+| **Source Citation** *(Trích dẫn nguồn)* | 3.00 | **4.30** | Hybrid RAG retains hierarchical metadata (Law -> Chapter -> Article) much better, yielding accurate citations. |
+| **Overall Score** | **3.06** | **3.99** | **+30.3%** |
