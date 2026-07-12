@@ -1,14 +1,13 @@
 # AuditAI guerrilla scaffold — tontide1/Traffic-law-chatbot
 
-- [ ] Review `dataset.json` — remove TODOs; keep only public-docs questions
-- [ ] Prefer real HTTP target when available; else use `mock_adapter.py`
-- [ ] Mock returns **empty contexts** on purpose (faithfulness uses dataset contexts)
-- [ ] For PR numbers: set `judge.provider` to `xai` or `openai` (not mock)
-- [ ] `python tests/auditai/mock_adapter.py` + `auditai run --config tests/auditai/auditai.yml`
-- [ ] Check report `judge_usage` (tokens in/out/total)
-- [ ] Fill PR body via `fill_pr_body.py` — never invent metrics
+Dataset: **20** cases · **40** doc chunks · **0** TODOs
+
+- [ ] Spot-check `dataset.json` (all from public docs; no private data)
+- [ ] Mock adapter is **intentionally weak** (one SEED) — expect FAIL with real judge
+- [ ] Prefer real HTTP target for meaningful product metrics
+- [ ] For PR numbers: `judge.provider` = `xai` or `openai` (not mock)
+- [ ] Never invent metric numbers — use `auditai-report.json` only
 - [ ] Badge only if maintainer wants it
-- [ ] If push rejects workflows: use `workflow-auditai.yml.example` (needs PAT `workflow` scope)
 
 Commands:
 
@@ -18,3 +17,9 @@ export XAI_API_KEY=...   # or OPENAI_API_KEY
 # edit auditai.yml judge.provider = xai|openai
 auditai run --config tests/auditai/auditai.yml
 ```
+
+
+## Config overrides
+
+- `AUDITAI_TARGET_URL` — real chat API URL (default mock `:18080`)
+- Default `judge.provider: mock` (set `xai`/`openai` + API key to opt in)
